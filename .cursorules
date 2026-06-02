@@ -1,0 +1,19 @@
+# ==========================================
+# REGLAS DE CONTEXTO GLOBAL: ROUSSE SHOPPING
+# ==========================================
+
+# 1. CONTEXTO DEL NEGOCIO
+- **Nombre de la Marca**: Rousse Shopping, una boutique física de retail y cuidado de la piel.
+- **Ubicación y Operación**: Ubicada en la zona de 5 Señores, Oaxaca de Juárez. Horarios de operación: 10:00 am - 4:00 pm y 5:00 pm - 9:00 pm.
+- **Modelo Financiero y Restricciones**: El rango de precios de los productos es estrictamente de $150 a $690 MXN. Las decisiones de inventario deben buscar impulsar las ventas hacia la meta mensual de $18,000 MXN.
+
+# 2. FILOSOFÍA DE DISEÑO (UI/UX PREMIUM)
+- **Estética**: "Premium Minimalist" inspirado en la limpieza visual y el orden corporativo de grandes cadenas de retail como Liverpool y Amazon. 
+- **Layout Responsivo**: El catálogo de productos debe ser 100% responsivo, adaptándose de forma fluida mediante Tailwind CSS (estructura de 4 columnas en pantallas Desktop y transformación a 2 columnas en dispositivos Mobile).
+- **Flujo de Conversión**: El objetivo principal es la conversión local. Cada tarjeta de producto y el resumen del carrito deben priorizar el botón interactivo de alta conversión: "Apartar y Consultar por WhatsApp". No implementar pasarelas de pago bancarias complejas por el momento.
+
+# 3. DIRECTRICES TÉCNICAS (AI NATIVE DEVELOPMENT)
+- **Stack Tecnológico**: React con Tailwind CSS para maquetación rápida y responsiva.
+- **Arquitectura de Datos Local**: Los productos (Ropa, Aretes/Accesorios, Perfumes, Cuidado de la Piel Sheló Nabel) se manejan actualmente mediante un estado (state) interactivo local o mock data empaquetada. 
+- **Modo Educativo / Vibe Coding**: Antes de generar o aplicar cualquier bloque de código o refactorización compleja, debes explicar brevemente el razonamiento técnico y el "por qué" de la solución (hooks utilizados, clases de Tailwind aplicadas, etc.) para asegurar el aprendizaje del desarrollador.
+- **Control de Cambios**: Al modificar un componente (como añadir las funciones de Crear, Editar o Eliminar en la vista de Administrador), asegúrate de no romper los estilos de alta gama ni el comportamiento responsivo del header y el catálogo ya construidos.
