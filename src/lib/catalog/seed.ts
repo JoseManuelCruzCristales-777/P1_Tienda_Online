@@ -12,7 +12,6 @@ export const seedProducts: Product[] = [
     category: "Perfumes",
     layoutRole: "featured",
     featuredLabel: "Exclusive Fragrance",
-    excerpt: "A bold scent merging oceanic notes with deep amber undertones.",
   },
   {
     id: "verona-leather-tote",

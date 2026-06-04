@@ -7,7 +7,7 @@ const BASE_URL = "";
 
 interface SitemapEntry {
   path: string;
-  changefreq?: "weekly" | "monthly";
+  changefreq?: "weekly" | "monthly" | "yearly";
   priority?: string;
 }
 
@@ -25,6 +25,10 @@ export const Route = createFileRoute("/sitemap.xml")({
             priority: "0.8",
           })),
           { path: "/bag", changefreq: "monthly", priority: "0.5" },
+          { path: "/wishlist", changefreq: "monthly", priority: "0.4" },
+          { path: "/contacto", changefreq: "monthly", priority: "0.6" },
+          { path: "/legal/privacidad", changefreq: "yearly", priority: "0.3" },
+          { path: "/legal/terminos", changefreq: "yearly", priority: "0.3" },
           { path: "/confirmation", changefreq: "monthly", priority: "0.3" },
         ];
         const urls = entries

@@ -1,49 +1,196 @@
 [
   {
+    "id": "aretes",
+    "title": "Aretes Dorados",
+    "price": "$180 MXN",
+    "imageUrl": "https://images.unsplash.com/photo-1630019852942-f89202989a59?w=500&q=80",
+    "description": "Aretes artesanales tejidos en hilo dorado, diseño exclusivo Oaxaca.",
+    "category": "Accessories",
+    "layoutRole": "featured",
+    "featuredLabel": "Nueva Colección"
+  },
+  {
     "id": "midnight-azure",
     "title": "Midnight Azure",
-    "price": "$320.00",
+    "price": "$320 MXN",
     "imageUrl": "https://lh3.googleusercontent.com/aida-public/AB6AXuBGlFoIcfN9ITWh_S76BYCmIVxGHSUUAt2qIgpXP3nUhRQJnzYmeq6pyVpnXwH3sFj83WD49AAgV2dfm8KlG9cIiXXh5-_FljaZo7hlIXEGJ880JQw94urYauUN1k6GVqBW72hCEUf5NKzq5el2FRaZJWukCGK5j74Zp5hc-IkTfw16y-ZsOA2Gj5JFiHN9bw6TkOZcgXbWbHIVWWosim6lSDLzgOGopVPNc7vdDT6b048hNGI-g_mU8M61T7VNH_YDXZAPRaNok0Y",
-    "description": "A bold scent merging oceanic notes with deep amber undertones. Crafted for evening wear and signature moments.",
+    "description": "Fragancia audaz con notas oceánicas y ámbar profundo. Creada para momentos de firma.",
     "category": "Perfumes",
     "layoutRole": "standard",
-    "featuredLabel": "Exclusive Fragrance",
-    "excerpt": "A bold scent merging oceanic notes with deep amber undertones."
+    "featuredLabel": "Fragancia Exclusiva"
   },
   {
-    "id": "verona-leather-tote",
-    "title": "Verona Leather Tote",
-    "price": "$450.00",
-    "imageUrl": "https://lh3.googleusercontent.com/aida-public/AB6AXuCr3ME-2OBXX30CBvfQd-t7u0Yw8zPiiOftWJeVPijukfN6-ewgowtBwCDnff5M095hc-OhnCORLfwPKTIib5boiJYngk2Z4Nah1DPKxP8cJ7rzE85OILLNaPM6wqZ0C7M_Zjj_aR26OnuWh0oU32kQAXgRBYUkDDiNkIJLOQil6ZQJ7gxqpYxpkfm61UJSHuuE3y6zpA-kgZBA0U_hoNpo9087VGlqN0GtC4Eaa737x4b9c_malt-ReUELurqCI-qnOUJxje5uZl8",
-    "description": "Structured full-grain leather tote with brushed gold hardware. Spacious interior for day-to-evening transitions.",
+    "id": "rose-elite",
+    "title": "Rose Élite",
+    "price": "$280 MXN",
+    "imageUrl": "https://images.unsplash.com/photo-1541140134513-85a161dc4a00?w=500&q=80",
+    "description": "Perfume floral con esencia de rosa búlgara y notas de jazmín blanco. Elegancia en cada gota.",
+    "category": "Perfumes",
+    "layoutRole": "standard"
+  },
+  {
+    "id": "vanilla-bloom",
+    "title": "Vanilla Bloom",
+    "price": "$250 MXN",
+    "imageUrl": "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=500&q=80",
+    "description": "Fragancia dulce y envolvente con vainilla de Madagascar y sándalo blanco.",
+    "category": "Perfumes",
+    "layoutRole": "standard"
+  },
+  {
+    "id": "vestido-lino",
+    "title": "Vestido Lino Premium",
+    "price": "$590 MXN",
+    "imageUrl": "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=500&q=80",
+    "description": "Vestido fluido de lino 100% con corte midi. Fresco, elegante y versátil.",
     "category": "Boutique",
     "layoutRole": "standard"
   },
   {
-    "id": "chronograph-gold-series",
-    "title": "Chronograph Gold Series",
-    "price": "$890.00",
-    "imageUrl": "https://lh3.googleusercontent.com/aida-public/AB6AXuCPOWSbrUb8VnzkPzANNkqk8fysdUCuvncznfB3dKeHa7Jr9Ffgd7W-gIjVjv7U-qB50d9WSOD7KIkxJCNO38XRBrdic5xYKlNGFQN_wjdAQyh50N4cxGHo0MgoTx9ljpAV2f8P2PJFUmC4xUz9q-uHe-2mrIEGLgjRuBB7G_1VrGhbJW-Z2SudMaR1Sr0BwTwb39eE-v7uNXxmvpL7aV0YskBuMhGEyCvhAsGX0QtebsvODySduAkCLRXu0PKIAF-qhaffLk3iFlk",
-    "description": "Swiss-inspired chronograph with sapphire crystal and gold-tone case. Water resistant to 50 meters.",
-    "category": "Accessories",
-    "layoutRole": "standard"
-  },
-  {
-    "id": "aura-aviators",
-    "title": "Aura Aviators",
-    "price": "$210.00",
-    "imageUrl": "https://lh3.googleusercontent.com/aida-public/AB6AXuB-r_83XItIv1O_kaeb0bviyMwfr-VcajmacWGqIELZ7zz9Q4e1aKKJ8HM2uf5KyEpzfG-UR_klHu56xzYYxqsYHyhPBvm-TIDDvee9bno_qwEETFbuYIJzIvnkOC9aFcLH3zk8HVZ5YIMtJ1N6QYtFK4e-10EZspsr72aUMyyc2V7OmkSarGXfhOkFTg1ivoQ59Sw5ql5WVZ6p-_UT9MM7o3qXAxo94SKO52dCYtBtkfKxtVEQoJxKVJ5lNnJfeajkrNKZONpvJ7k",
-    "description": "Lightweight titanium aviators with polarized lenses and anti-reflective coating.",
-    "category": "Accessories",
-    "layoutRole": "standard"
-  },
-  {
-    "id": "signature-tote",
-    "title": "The Signature Tote",
-    "price": "$4,500 MXN",
-    "imageUrl": "https://lh3.googleusercontent.com/aida-public/AB6AXuDPznQS2eSimKm3KBr9BgTl6eZLG1h0J1OtYiP8Mie5Tf0gCU5bc7iGs6Aq383u8QbUdup-2S0NGDbQ-lbUZbpfXN0QjOn6ebkjBpRDN78mXnVaa97Gs8fZ5OP9VEyVd7H4mA3OHZnJv28ThhcJdT5L9TplWUfwTYbBLcvMEE2fRp10TnEbLgBXGw2rLlH7X9udvsEV6tCBy2j6nsKCrjXQAvQEuHH6d_63u68fOFWzkpqpTvaHvBYYOTrEUOU_W7xj8YEuHiNa3Ns",
-    "description": "Crafted from the finest full-grain calf leather, the Signature Tote embodies timeless elegance and modern functionality.",
+    "id": "falda-midi",
+    "title": "Falda Midi Floral",
+    "price": "$450 MXN",
+    "imageUrl": "https://images.unsplash.com/photo-1583496661160-fb5886a0aaaa?w=500&q=80",
+    "description": "Falda midi con estampado floral en tonos tierra. Cintura elástica y vuelo perfecto.",
     "category": "Boutique",
     "layoutRole": "standard"
+  },
+  {
+    "id": "top-saten",
+    "title": "Top Satén Dorado",
+    "price": "$290 MXN",
+    "imageUrl": "https://images.unsplash.com/photo-1594938298603-c8148c4b4f3a?w=500&q=80",
+    "description": "Top de satén con ajuste perfecto. Ideal para combinar con jeans o falda midi.",
+    "category": "Boutique",
+    "layoutRole": "standard"
+  },
+  {
+    "id": "crema-regeneradora",
+    "title": "Crema Regeneradora Sheló",
+    "price": "$350 MXN",
+    "imageUrl": "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=500&q=80",
+    "description": "Crema facial Sheló Nabel con colágeno y vitamina E. Regenera y suaviza la piel desde la primera aplicación.",
+    "category": "Skincare",
+    "layoutRole": "standard"
+  },
+  {
+    "id": "serum-vitamina-c",
+    "title": "Sérum Vitamina C",
+    "price": "$480 MXN",
+    "imageUrl": "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=500&q=80",
+    "description": "Sérum concentrado de vitamina C al 20%. Ilumina, unifica el tono y combate manchas.",
+    "category": "Skincare",
+    "layoutRole": "standard"
+  },
+  {
+    "id": "mascarilla-hidratante",
+    "title": "Mascarilla Hidratante",
+    "price": "$280 MXN",
+    "imageUrl": "https://images.unsplash.com/photo-1596755389378-c31d21fd1273?w=500&q=80",
+    "description": "Mascarilla facial con ácido hialurónico y aloe vera. Hidratación profunda en 15 minutos.",
+    "category": "Skincare",
+    "layoutRole": "standard"
+  },
+  {
+    "id": "contorno-ojos",
+    "title": "Contorno de Ojos Sheló",
+    "price": "$390 MXN",
+    "imageUrl": "https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=500&q=80",
+    "description": "Gel contorno de ojos anti-ojeras y anti-bolsas. Fórmula Sheló Nabel con péptidos activos.",
+    "category": "Skincare",
+    "layoutRole": "standard"
+  },
+  {
+    "id": "collar-perlas",
+    "title": "Collar Perlas Doradas",
+    "price": "$350 MXN",
+    "imageUrl": "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=500&q=80",
+    "description": "Collar de perlas cultivadas con cierre de oro laminado 18k. Elegancia atemporal.",
+    "category": "Accessories",
+    "layoutRole": "standard"
+  },
+  {
+    "id": "pulsera-gold",
+    "title": "Pulsera Tejida Gold",
+    "price": "$180 MXN",
+    "imageUrl": "https://images.unsplash.com/photo-1573408301185-9519f94815b1?w=500&q=80",
+    "description": "Pulsera tejida en hilo dorado con cierre de presión. Diseño artesanal Oaxaqueño.",
+    "category": "Accessories",
+    "layoutRole": "standard"
+  },
+  {
+    "id": "conjunto-verano",
+    "title": "Conjunto Lino Verano",
+    "price": "$690 MXN",
+    "imageUrl": "https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=500&q=80",
+    "description": "Conjunto de blusa y pantalón en lino natural. Comodidad y estilo en una sola pieza.",
+    "category": "New Collection",
+    "layoutRole": "standard"
+  },
+  {
+    "id": "aretes-huichol",
+    "title": "Aretes Huichol Premium",
+    "price": "$320 MXN",
+    "imageUrl": "https://images.unsplash.com/photo-1630019852942-f89202989a59?w=500&q=80",
+    "description": "Aretes con diseño Huichol en chaquira multicolor. Arte mexicano en su máxima expresión.",
+    "category": "New Collection",
+    "layoutRole": "standard"
+  },
+  {
+    "id": "blusa-frida",
+    "title": "Blusa Frida Edit",
+    "price": "$450 MXN",
+    "imageUrl": "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=500&q=80",
+    "description": "Blusa inspirada en Frida Kahlo con bordado en flores de colores vibrantes sobre manta blanca.",
+    "category": "New Collection",
+    "layoutRole": "standard"
+  },
+  {
+    "id": "kimono-seda",
+    "title": "Kimono Seda Floral",
+    "price": "$550 MXN",
+    "imageUrl": "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=500&q=80",
+    "description": "Kimono ligero en tela tipo seda con estampado floral japonés. Nueva colección primavera.",
+    "category": "New Collection",
+    "layoutRole": "standard"
+  },
+  {
+    "id": "mascarilla",
+    "title": "MASCARILLA",
+    "price": "120",
+    "imageUrl": "data:image/jpeg;base64,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",
+    "description": "LA MEJOR",
+    "category": "Skincare",
+    "layoutRole": "standard"
+  },
+  {
+    "id": "mascara-facial",
+    "title": "MASCARA FACIAL",
+    "price": "120",
+    "imageUrl": "data:image/jpeg;base64,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",
+    "description": "EFICIENTE",
+    "category": "Skincare",
+    "layoutRole": "standard",
+    "featuredLabel": "UNA EXPERIENCIA"
+  },
+  {
+    "id": "vestido-cafe",
+    "title": "Vestido cafe",
+    "price": "650",
+    "imageUrl": "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcRI6wdtrvBCSDDsi5eZ0HJRv58ufGCs2-Smk8MsOmTxSWi0N_tOf1COjHJ5AI86IhJwjSN06DsTXG2VHIv3HpmxfvxYnrkXrP6Y49x2cgEJ-NScxmHCvkf2EVBxhxdeWyyBB8L20SY&usqp=CAc",
+    "description": "para mujer con lunares para salir a la noche, cuello cuadrado",
+    "category": "Boutique",
+    "layoutRole": "standard",
+    "featuredLabel": "Vestido Exclusivo"
+  },
+  {
+    "id": "vestido-cafe-1",
+    "title": "Vestido cafe",
+    "price": "480",
+    "imageUrl": "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcRI6wdtrvBCSDDsi5eZ0HJRv58ufGCs2-Smk8MsOmTxSWi0N_tOf1COjHJ5AI86IhJwjSN06DsTXG2VHIv3HpmxfvxYnrkXrP6Y49x2cgEJ-NScxmHCvkf2EVBxhxdeWyyBB8L20SY&usqp=CAc",
+    "description": "vestido de alta comodidad",
+    "category": "Boutique",
+    "layoutRole": "standard",
+    "featuredLabel": "vestido exclusivo"
   }
 ]

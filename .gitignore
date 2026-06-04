@@ -20,6 +20,8 @@ dist-ssr
 .nitro
 *.local
 
+data/admin-sessions.json
+
 # Wrangler / Cloudflare
 .wrangler/
 .dev.vars

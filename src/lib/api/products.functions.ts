@@ -1,7 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
-import { requireAdminToken } from "./auth.admin.functions";
 import {
   createProduct,
   deleteProduct,
@@ -18,7 +17,6 @@ const productInputSchema = z.object({
   category: z.string().min(1),
   layoutRole: z.enum(["featured", "standard"]),
   featuredLabel: z.string().optional(),
-  excerpt: z.string().optional(),
 });
 
 const adminTokenSchema = z.object({
@@ -37,6 +35,11 @@ const getProductSchema = z.object({
   id: z.string().min(1),
 });
 
+async function requireAdminToken(adminToken: string | undefined) {
+  const { assertAdminToken } = await import("../auth/admin-sessions.server");
+  assertAdminToken(adminToken);
+}
+
 export const fetchProducts = createServerFn({ method: "POST" }).handler(async () => {
   return listProducts();
 });
@@ -54,7 +57,7 @@ export const fetchProduct = createServerFn({ method: "POST" })
 export const createCatalogProduct = createServerFn({ method: "POST" })
   .inputValidator(createProductSchema)
   .handler(async ({ data }) => {
-    requireAdminToken(data.adminToken);
+    await requireAdminToken(data.adminToken);
     const { adminToken: _, ...input } = data;
     return createProduct(input);
   });
@@ -62,7 +65,7 @@ export const createCatalogProduct = createServerFn({ method: "POST" })
 export const updateCatalogProduct = createServerFn({ method: "POST" })
   .inputValidator(updateProductSchema)
   .handler(async ({ data }) => {
-    requireAdminToken(data.adminToken);
+    await requireAdminToken(data.adminToken);
     const { adminToken: _, id, ...input } = data;
     const updated = await updateProduct(id, input);
     if (!updated) {
@@ -74,7 +77,7 @@ export const updateCatalogProduct = createServerFn({ method: "POST" })
 export const deleteCatalogProduct = createServerFn({ method: "POST" })
   .inputValidator(deleteProductSchema)
   .handler(async ({ data }) => {
-    requireAdminToken(data.adminToken);
+    await requireAdminToken(data.adminToken);
     const deleted = await deleteProduct(data.id);
     if (!deleted) {
       throw new Error("Product not found");

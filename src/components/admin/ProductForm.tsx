@@ -1,6 +1,6 @@
 import type { ProductFormValues } from "@/lib/catalog/types";
-
-const CATEGORIES = ["Boutique", "Perfumes", "Skincare", "Accessories", "New Collection"];
+import { useI18n } from "@/lib/i18n/I18nProvider";
+import { CATEGORY_LABEL_KEYS, FILTER_CATEGORIES } from "@/lib/i18n/translations";
 
 type ProductFormProps = {
   values: ProductFormValues;
@@ -9,6 +9,7 @@ type ProductFormProps = {
   submitLabel: string;
   isSubmitting?: boolean;
   error?: string | null;
+  success?: string | null;
 };
 
 export function ProductForm({
@@ -18,13 +19,25 @@ export function ProductForm({
   submitLabel,
   isSubmitting,
   error,
+  success,
 }: ProductFormProps) {
+  const { t } = useI18n();
+
   const update = <K extends keyof ProductFormValues>(key: K, value: ProductFormValues[K]) => {
     onChange({ ...values, [key]: value });
   };
 
   return (
     <form onSubmit={onSubmit} className="flex max-w-2xl flex-col gap-6">
+      {success ? (
+        <p
+          role="status"
+          className="rounded-lg border border-secondary/40 bg-secondary-container/50 px-4 py-3 text-sm font-medium text-on-secondary-container"
+        >
+          {success}
+        </p>
+      ) : null}
+
       {error ? (
         <p className="rounded-lg border border-error/30 bg-error-container px-4 py-3 text-sm text-error">
           {error}
@@ -33,7 +46,7 @@ export function ProductForm({
 
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-2 sm:col-span-2">
-          <span className="text-label-md uppercase text-on-surface-variant">Title</span>
+          <span className="text-label-md uppercase text-on-surface-variant">{t("admin_form_title")}</span>
           <input
             required
             value={values.title}
@@ -43,33 +56,33 @@ export function ProductForm({
         </label>
 
         <label className="flex flex-col gap-2">
-          <span className="text-label-md uppercase text-on-surface-variant">Price</span>
+          <span className="text-label-md uppercase text-on-surface-variant">{t("admin_form_price")}</span>
           <input
             required
             value={values.price}
             onChange={(e) => update("price", e.target.value)}
-            placeholder="$450.00"
+            placeholder={t("admin_form_price_placeholder")}
             className="rounded-lg border border-outline-variant bg-surface-container-low px-4 py-3 text-body-md outline-none focus:border-primary"
           />
         </label>
 
         <label className="flex flex-col gap-2">
-          <span className="text-label-md uppercase text-on-surface-variant">Category</span>
+          <span className="text-label-md uppercase text-on-surface-variant">{t("admin_form_category")}</span>
           <select
             value={values.category}
             onChange={(e) => update("category", e.target.value)}
             className="rounded-lg border border-outline-variant bg-surface-container-low px-4 py-3 text-body-md outline-none focus:border-primary"
           >
-            {CATEGORIES.map((category) => (
+            {FILTER_CATEGORIES.map((category) => (
               <option key={category} value={category}>
-                {category}
+                {CATEGORY_LABEL_KEYS[category] ? t(CATEGORY_LABEL_KEYS[category]) : category}
               </option>
             ))}
           </select>
         </label>
 
         <label className="flex flex-col gap-2 sm:col-span-2">
-          <span className="text-label-md uppercase text-on-surface-variant">Image URL</span>
+          <span className="text-label-md uppercase text-on-surface-variant">{t("admin_form_image")}</span>
           <input
             required
             type="url"
@@ -80,7 +93,9 @@ export function ProductForm({
         </label>
 
         <label className="flex flex-col gap-2 sm:col-span-2">
-          <span className="text-label-md uppercase text-on-surface-variant">Description</span>
+          <span className="text-label-md uppercase text-on-surface-variant">
+            {t("admin_form_description")}
+          </span>
           <textarea
             required
             rows={4}
@@ -91,32 +106,25 @@ export function ProductForm({
         </label>
 
         <label className="flex flex-col gap-2">
-          <span className="text-label-md uppercase text-on-surface-variant">Layout</span>
+          <span className="text-label-md uppercase text-on-surface-variant">{t("admin_form_layout")}</span>
           <select
             value={values.layoutRole}
             onChange={(e) => update("layoutRole", e.target.value as ProductFormValues["layoutRole"])}
             className="rounded-lg border border-outline-variant bg-surface-container-low px-4 py-3 text-body-md outline-none focus:border-primary"
           >
-            <option value="standard">Standard card</option>
-            <option value="featured">Featured (hero grid)</option>
+            <option value="standard">{t("admin_form_layout_standard")}</option>
+            <option value="featured">{t("admin_form_layout_featured")}</option>
           </select>
         </label>
 
-        <label className="flex flex-col gap-2">
-          <span className="text-label-md uppercase text-on-surface-variant">Featured label</span>
+        <label className="flex flex-col gap-2 sm:col-span-2">
+          <span className="text-label-md uppercase text-on-surface-variant">
+            {t("admin_form_featured_label")}
+          </span>
           <input
             value={values.featuredLabel}
             onChange={(e) => update("featuredLabel", e.target.value)}
-            placeholder="Exclusive Fragrance"
-            className="rounded-lg border border-outline-variant bg-surface-container-low px-4 py-3 text-body-md outline-none focus:border-primary"
-          />
-        </label>
-
-        <label className="flex flex-col gap-2 sm:col-span-2">
-          <span className="text-label-md uppercase text-on-surface-variant">Featured excerpt</span>
-          <input
-            value={values.excerpt}
-            onChange={(e) => update("excerpt", e.target.value)}
+            placeholder={t("admin_form_featured_placeholder")}
             className="rounded-lg border border-outline-variant bg-surface-container-low px-4 py-3 text-body-md outline-none focus:border-primary"
           />
         </label>
@@ -127,7 +135,7 @@ export function ProductForm({
         disabled={isSubmitting}
         className="w-fit rounded-full bg-primary px-8 py-3 text-sm font-semibold uppercase tracking-widest text-on-primary transition-opacity hover:opacity-90 disabled:opacity-50"
       >
-        {isSubmitting ? "Saving…" : submitLabel}
+        {isSubmitting ? t("admin_form_saving") : submitLabel}
       </button>
     </form>
   );

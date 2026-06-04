@@ -2,6 +2,7 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 
 import { fetchProducts } from "@/lib/api/products.functions";
 import { catalogKeys } from "@/lib/catalog/queries";
+import { homeSearch } from "@/lib/home-search";
 
 export const Route = createFileRoute("/product/")({
   loader: async ({ context }) => {
@@ -11,7 +12,7 @@ export const Route = createFileRoute("/product/")({
     });
     const first = products[0];
     if (!first) {
-      throw redirect({ to: "/" });
+      throw redirect({ to: "/", search: homeSearch });
     }
     throw redirect({
       to: "/product/$productId",

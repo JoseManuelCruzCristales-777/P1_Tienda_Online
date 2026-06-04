@@ -9,22 +9,26 @@ import {
 } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
+import { StoreAuxiliaryUi } from "@/components/StoreAuxiliaryUi";
+import { Toaster } from "@/components/ui/sonner";
+import { homeSearch } from "@/lib/home-search";
+import { I18nProvider, useI18n } from "@/lib/i18n/I18nProvider";
 
 function NotFoundComponent() {
+  const { t } = useI18n();
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-7xl font-bold text-primary">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-on-surface">Page not found</h2>
-        <p className="mt-2 text-sm text-on-surface-variant">
-          The page you're looking for doesn't exist.
-        </p>
+        <h2 className="mt-4 text-xl font-semibold text-on-surface">{t("notfound_title")}</h2>
+        <p className="mt-2 text-sm text-on-surface-variant">{t("notfound_desc")}</p>
         <div className="mt-6">
           <Link
             to="/"
+            search={homeSearch}
             className="inline-flex items-center justify-center rounded-full bg-primary px-6 py-3 text-sm font-semibold uppercase tracking-widest text-on-primary transition-opacity hover:opacity-90"
           >
-            Go home
+            {t("notfound_home")}
           </Link>
         </div>
       </div>
@@ -35,21 +39,26 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
+  const { t } = useI18n();
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold text-on-surface">This page didn't load</h1>
-        <p className="mt-2 text-sm text-on-surface-variant">Something went wrong. Try refreshing.</p>
+        <h1 className="text-xl font-semibold text-on-surface">{t("error_title")}</h1>
+        <p className="mt-2 text-sm text-on-surface-variant">{t("error_desc")}</p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
             onClick={() => { router.invalidate(); reset(); }}
             className="rounded-full bg-primary px-6 py-3 text-sm font-semibold uppercase tracking-widest text-on-primary hover:opacity-90"
           >
-            Try again
+            {t("error_retry")}
           </button>
-          <a href="/" className="rounded-full border border-primary px-6 py-3 text-sm font-semibold uppercase tracking-widest text-primary hover:bg-surface-variant">
-            Go home
-          </a>
+          <Link
+            to="/"
+            search={homeSearch}
+            className="rounded-full border border-primary px-6 py-3 text-sm font-semibold uppercase tracking-widest text-primary hover:bg-surface-variant"
+          >
+            {t("notfound_home")}
+          </Link>
         </div>
       </div>
     </div>
@@ -88,12 +97,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="es" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>
       <body>
-        {children}
+        <I18nProvider>{children}</I18nProvider>
         <Scripts />
       </body>
     </html>
@@ -105,6 +114,8 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <Outlet />
+      <Toaster position="top-center" richColors closeButton />
+      <StoreAuxiliaryUi />
     </QueryClientProvider>
   );
 }

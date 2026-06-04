@@ -1,9 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 import { useState } from "react";
-import { SiteHeader, SiteFooter } from "@/components/SiteChrome";
-// 1. Importamos las funciones de autenticación basadas en tu arquitectura
-import { loginAdmin } from "@/lib/api/auth.admin.functions";
-import { setAdminToken } from "../lib/auth/admin-session";
+
+import { SiteFooter, SiteHeader } from "@/components/SiteChrome";
+import { authenticateCustomer } from "@/lib/customers";
+import { useI18n } from "@/lib/i18n/I18nProvider";
+import { setSession } from "@/lib/session";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -11,49 +13,51 @@ export const Route = createFileRoute("/login")({
       { title: "Iniciar sesión — Rousse Shopping" },
       { name: "description", content: "Accede a tu cuenta Rousse Shopping para gestionar tus apartados y favoritos." },
       { property: "og:title", content: "Iniciar sesión — Rousse Shopping" },
-      { property: "og:description", content: "Accede a tu cuenta Rousse Shopping." },
     ],
   }),
   component: LoginPage,
 });
 
 function LoginPage() {
-  const navigate = useNavigate(); // Hook de TanStack Router para redirigir
-  const [showPassword, setShowPassword] = useState(false);
+  const { t } = useI18n();
+  const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(""); // Estado para pintar errores en pantalla
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  // 2. Creamos la función controladora del envío del formulario
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setIsLoading(true);
 
     try {
-      // Tu backend simulado espera usuario y contraseña. Usaremos el email como username
-      // o puedes poner directamente "admin" si es lo que busca la función.
-      // const response = await loginAdmin({ data: { username: email, password: password } });
-      const response = await loginAdmin({
-        data: {
-          username: email,
-          password: password
-        }
+      // TODO: Reemplazar con supabase.auth.signInWithPassword({ email, password })
+      // cuando conectes Supabase. Eliminar la llamada a authenticateCustomer.
+      const customer = authenticateCustomer(email.trim(), password);
+
+      if (!customer) {
+        setError("Correo o contraseña incorrectos. Verifica tus datos.");
+        return;
+      }
+
+      // Guarda la sesión en localStorage bajo la clave 'rousse-session'
+      setSession({
+        id: customer.id,
+        name: customer.fullName,
+        email: customer.email,
+        phone: customer.phone,
       });
-      console.log(response);
 
-      if (response.success && response.token) {
-        // Cambiamos la llamada vieja por la función real
-        setAdminToken(response.token);
+      // Notifica al Header para que actualice la UI en tiempo real sin recargar
+      // TODO: con Supabase, esto lo maneja supabase.auth.onAuthStateChange()
+      window.dispatchEvent(new Event("auth-updated"));
 
-        navigate({ to: "/admin" });
-      }
-      else {
-        setError("Usuario o contraseña incorrectos. Intenta con las credenciales por defecto.");
-      }
+      await navigate({ to: "/", search: { category: undefined, q: undefined } });
     } catch (err) {
-      setError("Hubo un error de conexión con el servidor local.");
+      setError("Hubo un error inesperado. Intenta de nuevo.");
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -61,135 +65,130 @@ function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="flex min-h-screen flex-col bg-background">
       <SiteHeader />
 
-      <main className="flex-1 flex items-center justify-center px-margin-mobile md:px-margin-desktop py-12">
-        <div className="w-full max-w-5xl grid md:grid-cols-2 rounded-xl overflow-hidden shadow-[0_30px_80px_rgba(7,6,40,0.12)] bg-surface-container-lowest">
-          {/* Brand panel */}
-          <aside className="hidden md:flex flex-col justify-between bg-primary text-on-primary p-10 relative overflow-hidden">
-            <div className="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-secondary-container/20 blur-3xl" />
-            <div className="absolute -bottom-32 -left-20 w-80 h-80 rounded-full bg-primary-container/40 blur-3xl" />
+      <main className="flex flex-1 items-center justify-center px-margin-mobile py-12 md:px-margin-desktop">
+        <div className="grid w-full max-w-5xl overflow-hidden rounded-xl bg-surface-container-lowest shadow-[0_30px_80px_rgba(7,6,40,0.12)] md:grid-cols-2">
 
+          {/* ── Panel de marca ── */}
+          <aside className="relative hidden flex-col justify-between overflow-hidden bg-primary p-10 text-on-primary md:flex">
+            <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-secondary-container/20 blur-3xl" />
+            <div className="absolute -bottom-32 -left-20 h-80 w-80 rounded-full bg-primary-container/40 blur-3xl" />
             <div className="relative">
-              <div className="w-12 h-12 rounded-full bg-on-primary text-primary flex items-center justify-center font-headline-md text-xl">R</div>
+              <img src="/logo.png" alt="Rousse Shopping" className="h-16 w-16 rounded-full object-cover" />
               <h2 className="mt-10 font-headline-xl text-headline-xl leading-tight">
                 Bienvenida<br />de vuelta.
               </h2>
-              <p className="mt-4 text-body-md text-on-primary/80 max-w-xs">
+              <p className="mt-4 max-w-xs text-body-md text-on-primary/80">
                 Gestiona tus apartados, descubre nuevas colecciones y recoge en boutique sin complicaciones.
               </p>
             </div>
-
-            <div className="relative text-label-md uppercase tracking-widest text-on-primary/60">
+            <span className="relative font-label-md uppercase tracking-widest text-on-primary/60">
               Rousse · Boutique Edition
-            </div>
+            </span>
           </aside>
 
-          {/* Form panel */}
-          <section className="p-8 md:p-12 flex flex-col justify-center">
+          {/* ── Formulario ── */}
+          <section className="flex flex-col justify-center p-8 md:p-12">
             <div className="mb-8">
-              <h1 className="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface">
-                Inicia sesión
+              <h1 className="font-headline-lg text-headline-lg-mobile text-on-surface md:text-headline-lg">
+                {t("login_title")}
               </h1>
               <p className="mt-2 text-body-md text-on-surface-variant">
-                ¿Aún no tienes cuenta?{" "}
-                <Link to="/login" className="text-primary font-semibold hover:underline">
-                  Regístrate
+                {t("login_no_account")}{" "}
+                <Link to="/register" className="font-semibold text-primary hover:underline">
+                  {t("login_register")}
                 </Link>
               </p>
             </div>
 
-            {/* 5. Conectamos la acción real del formulario */}
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
 
-              {/* Alerta visual de error si las credenciales fallan */}
+              {/* Error banner */}
               {error && (
-                <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm font-medium">
+                <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm font-medium text-red-700">
                   {error}
                 </div>
               )}
 
+              {/* Email */}
               <label className="flex flex-col gap-2">
-                <span className="text-label-md uppercase text-on-surface-variant">Usuario o Correo</span>
-                <div className="flex items-center bg-surface-container-low border border-outline-variant rounded-lg px-4 py-3 focus-within:border-primary transition-colors">
-                  <span className="material-symbols-outlined text-outline mr-2">mail</span>
+                <span className="text-xs uppercase tracking-widest text-on-surface-variant">
+                  Correo electrónico
+                </span>
+                <div className="flex items-center rounded-lg border border-outline-variant bg-surface-container-low px-4 py-3 transition-colors focus-within:border-primary">
+                  <Mail aria-hidden className="mr-2 size-4 shrink-0 text-outline" />
                   <input
-                    type="text" // Cambiado a text por si usas el username "admin" directo
+                    type="email"
                     required
+                    autoComplete="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="admin o tu@correo.com"
-                    className="bg-transparent outline-none w-full text-body-md text-on-surface placeholder-outline"
+                    placeholder="tu@correo.com"
+                    className="w-full bg-transparent text-body-md text-on-surface outline-none placeholder:text-outline"
                   />
                 </div>
               </label>
 
+              {/* Password */}
               <label className="flex flex-col gap-2">
-                <span className="text-label-md uppercase text-on-surface-variant">Contraseña</span>
-                <div className="flex items-center bg-surface-container-low border border-outline-variant rounded-lg px-4 py-3 focus-within:border-primary transition-colors">
-                  <span className="material-symbols-outlined text-outline mr-2">lock</span>
+                <span className="text-xs uppercase tracking-widest text-on-surface-variant">
+                  Contraseña
+                </span>
+                <div className="flex items-center rounded-lg border border-outline-variant bg-surface-container-low px-4 py-3 transition-colors focus-within:border-primary">
+                  <Lock aria-hidden className="mr-2 size-4 shrink-0 text-outline" />
                   <input
                     type={showPassword ? "text" : "password"}
                     required
+                    autoComplete="current-password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="bg-transparent outline-none w-full text-body-md text-on-surface placeholder-outline"
+                    className="w-full bg-transparent text-body-md text-on-surface outline-none placeholder:text-outline"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword((v) => !v)}
                     aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
-                    aria-pressed={showPassword}
-                    className="ml-2 text-on-surface-variant hover:text-primary transition-colors"
+                    className="ml-2 text-on-surface-variant transition-colors hover:text-primary"
                   >
-                    <span className="material-symbols-outlined">
-                      {showPassword ? "visibility_off" : "visibility"}
-                    </span>
+                    {showPassword
+                      ? <EyeOff aria-hidden className="size-4" />
+                      : <Eye aria-hidden className="size-4" />
+                    }
                   </button>
                 </div>
               </label>
 
-              <div className="flex items-center justify-between text-body-md">
-                <label className="flex items-center gap-2 text-on-surface-variant cursor-pointer">
-                  <input type="checkbox" className="accent-primary w-4 h-4" />
-                  Recuérdame
-                </label>
-                <button type="button" className="text-primary font-semibold hover:underline">
-                  ¿Olvidaste tu contraseña?
-                </button>
-              </div>
-
+              {/* Submit */}
               <button
                 type="submit"
                 disabled={isLoading}
-                className="mt-2 bg-primary text-on-primary rounded-full py-3.5 font-semibold tracking-wide hover:bg-primary-container transition-colors disabled:opacity-50"
+                className="mt-2 rounded-full bg-primary py-3.5 font-semibold tracking-wide text-on-primary transition-colors hover:bg-primary-container disabled:opacity-50"
               >
-                {isLoading ? "Cargando..." : "Entrar"}
+                {isLoading ? t("login_loading") : t("login_submit")}
               </button>
 
-              <div className="flex items-center gap-3 my-2">
-                <div className="flex-1 h-px bg-surface-container-highest" />
-                <span className="text-label-md uppercase text-on-surface-variant">o continúa con</span>
-                <div className="flex-1 h-px bg-surface-container-highest" />
+              <div className="flex items-center gap-3">
+                <div className="h-px flex-1 bg-surface-container-highest" />
+                <span className="font-label-md text-xs uppercase text-on-surface-variant">o</span>
+                <div className="h-px flex-1 bg-surface-container-highest" />
               </div>
 
-              <button
-                type="button"
-                className="flex items-center justify-center gap-3 border border-outline-variant rounded-full py-3 font-medium text-on-surface hover:bg-surface-container transition-colors"
+              {/* Admin shortcut */}
+              <Link
+                to="/admin/login"
+                className="flex items-center justify-center gap-2 rounded-full border border-outline-variant py-3 text-sm font-medium text-on-surface transition-colors hover:bg-surface-container"
               >
-                <img
-                  src="https://www.gstatic.com/marketing-cms/assets/images/d5/dc/cfe9ce8b4425b410b49b7f2dd3f3/g.webp=s48-fcrop64=1,00000000ffffffff-rw"
-                  alt=""
-                  className="w-5 h-5"
-                />
-                Continuar con Google
-              </button>
+                {t("login_admin")}
+              </Link>
             </form>
 
-            <p className="mt-8 text-xs text-on-surface-variant text-center">
-              Al continuar aceptas nuestros <a className="underline" href="#">Términos</a> y <a className="underline" href="#">Política de Privacidad</a>.
+            <p className="mt-8 text-center text-xs text-on-surface-variant">
+              Al continuar aceptas nuestros{" "}
+              <a className="underline" href="#">Términos</a> y{" "}
+              <a className="underline" href="#">Política de Privacidad</a>.
             </p>
           </section>
         </div>
