@@ -26,15 +26,17 @@ export function FeaturedProductCard({ product, className }: FeaturedProductCardP
         style={{ backgroundImage: `url('${product.imageUrl}')` }}
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80" />
-      <div className="absolute bottom-0 left-0 flex w-full flex-col justify-end p-8">
+      <div className="absolute bottom-0 left-0 flex w-full flex-col justify-end p-4 sm:p-6 md:p-8">
         {product.featuredLabel ? (
-          <span className="mb-2 font-label-md text-label-md uppercase text-secondary-fixed">
+          <span className="mb-1 text-[11px] font-semibold uppercase tracking-widest text-secondary-fixed sm:mb-2 sm:text-label-md">
             {product.featuredLabel}
           </span>
         ) : null}
-        <h3 className="mb-1 font-headline-md text-headline-md text-on-primary">{product.title}</h3>
+        <h3 className="mb-1 text-lg font-medium leading-tight text-on-primary sm:text-headline-md">
+          {product.title}
+        </h3>
         {summary ? (
-          <p className="h-0 overflow-hidden font-body-md text-body-md text-surface-bright/80 opacity-0 transition-opacity duration-300 group-hover:h-auto group-hover:opacity-100">
+          <p className="line-clamp-2 text-xs leading-relaxed text-surface-bright/90 sm:text-sm md:line-clamp-none md:text-body-md md:opacity-0 md:transition-opacity md:duration-300 md:group-hover:opacity-100">
             {summary}
           </p>
         ) : null}

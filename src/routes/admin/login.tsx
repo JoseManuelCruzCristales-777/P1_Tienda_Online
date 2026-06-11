@@ -23,15 +23,24 @@ function AdminLoginPage() {
     event.preventDefault();
     setError(null);
     setIsSubmitting(true);
+
+    const trimmedUser = username.trim();
+
     try {
-      const result = await loginAdmin({ data: { username, password } });
+      const result = await loginAdmin({
+        data: { username: trimmedUser, password },
+      });
+
       if (!result.ok) {
         setError(result.error ?? t("admin_login_invalid"));
         return;
       }
+
       setAdminToken(result.token);
-      await navigate({ to: "/admin" });
-    } catch {
+      setIsSubmitting(false);
+      void navigate({ to: "/admin", replace: true });
+    } catch (err) {
+      console.error(err);
       setError(t("admin_login_error"));
     } finally {
       setIsSubmitting(false);
@@ -73,6 +82,7 @@ function AdminLoginPage() {
               autoComplete="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
+              placeholder="admin"
               className="rounded-lg border border-outline-variant bg-surface px-4 py-3 outline-none focus:border-primary"
             />
           </label>
@@ -100,11 +110,15 @@ function AdminLoginPage() {
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-on-surface-variant">
-          <Link to="/" search={homeSearch} className="text-primary hover:underline">
+        <div className="mt-6 text-center">
+          <Link
+            to="/"
+            search={homeSearch}
+            className="inline-flex w-full items-center justify-center rounded-full border border-outline-variant px-6 py-3 text-sm font-medium text-on-surface-variant transition-colors hover:border-primary hover:bg-surface-container hover:text-primary"
+          >
             {t("admin_login_back")}
           </Link>
-        </p>
+        </div>
       </div>
     </div>
   );

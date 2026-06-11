@@ -4,6 +4,7 @@ import { toast } from "sonner";
 
 import { handleAdminAuthFailure } from "@/lib/auth/admin-auth";
 import { useDeleteProduct, useProducts } from "@/lib/catalog/queries";
+import { sumVariantStock } from "@/lib/catalog/variants";
 import { useI18n } from "@/lib/i18n/I18nProvider";
 import { CATEGORY_LABEL_KEYS } from "@/lib/i18n/translations";
 
@@ -47,7 +48,9 @@ function AdminProductsPage() {
     <div>
       <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-headline-lg text-headline-lg text-primary">{t("admin_products_title")}</h1>
+          <h1 className="font-headline-lg text-headline-lg text-primary">
+            {t("admin_products_title")}
+          </h1>
           <p className="mt-1 text-body-md text-on-surface-variant">
             {t("admin_products_count", { count: products?.length ?? 0 })}
           </p>
@@ -74,6 +77,9 @@ function AdminProductsPage() {
               <th className="px-4 py-3 font-label-md uppercase text-on-surface-variant">
                 {t("admin_col_price")}
               </th>
+              <th className="hidden px-4 py-3 font-label-md uppercase text-on-surface-variant sm:table-cell">
+                {t("admin_col_stock")}
+              </th>
               <th className="px-4 py-3 font-label-md uppercase text-on-surface-variant">
                 {t("admin_col_layout")}
               </th>
@@ -84,7 +90,10 @@ function AdminProductsPage() {
           </thead>
           <tbody>
             {products?.map((product) => (
-              <tr key={product.id} className="border-b border-surface-container-highest last:border-0">
+              <tr
+                key={product.id}
+                className="border-b border-surface-container-highest last:border-0"
+              >
                 <td className="px-4 py-4">
                   <div className="flex items-center gap-3">
                     <img src={product.imageUrl} alt="" className="h-12 w-12 rounded object-cover" />
@@ -100,6 +109,9 @@ function AdminProductsPage() {
                     : product.category}
                 </td>
                 <td className="px-4 py-4 text-on-surface-variant">{product.price}</td>
+                <td className="hidden px-4 py-4 font-medium text-on-surface sm:table-cell">
+                  {sumVariantStock(product.variants)}
+                </td>
                 <td className="px-4 py-4 text-on-surface-variant">
                   {product.layoutRole === "featured"
                     ? t("admin_layout_featured")

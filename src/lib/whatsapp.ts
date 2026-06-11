@@ -29,14 +29,10 @@ function buildWaUrl(text: string): string {
   return `https://wa.me/${getWhatsAppNumber()}?text=${encodeURIComponent(text)}`;
 }
 
-function customerBlock(
-  customer: WhatsAppCustomer | undefined,
-  locale: WhatsAppLocale,
-): string[] {
+function customerBlock(customer: WhatsAppCustomer | undefined, locale: WhatsAppLocale): string[] {
   if (!customer?.name && !customer?.phone && !customer?.email) return [];
 
-  const header =
-    locale === "en" ? "My details:" : "Mis datos:";
+  const header = locale === "en" ? "My details:" : "Mis datos:";
   const lines: string[] = [header];
   if (customer.name) {
     lines.push(locale === "en" ? `• Name: ${customer.name}` : `• Nombre: ${customer.name}`);
@@ -55,17 +51,14 @@ export function buildCartWhatsAppUrl(
   options: WhatsAppMessageOptions = {},
 ): string {
   const locale = options.locale ?? "es";
-  const lines = items.map(
-    (item) => `• ${item.title} x${item.quantity} — ${item.price}`,
-  );
+  const lines = items.map((item) => `• ${item.title} x${item.quantity} — ${item.price}`);
 
   const intro =
     locale === "en"
       ? "Hi 👋 I'd like to reserve the following items from *Rousse Shopping*:"
       : "Hola 👋 Quiero apartar los siguientes productos de *Rousse Shopping*:";
 
-  const outro =
-    locale === "en" ? "Are they available?" : "¿Están disponibles?";
+  const outro = locale === "en" ? "Are they available?" : "¿Están disponibles?";
 
   const totalLine =
     options.total != null && options.total > 0
@@ -102,12 +95,9 @@ export function buildSingleWhatsAppUrl(
       : "Hola 👋 Quiero apartar este producto de *Rousse Shopping*:";
 
   const productLine =
-    locale === "en"
-      ? `• Product: *${item.title}*`
-      : `• Producto: *${item.title}*`;
+    locale === "en" ? `• Product: *${item.title}*` : `• Producto: *${item.title}*`;
 
-  const priceLine =
-    locale === "en" ? `• Price: ${item.price}` : `• Precio: ${item.price}`;
+  const priceLine = locale === "en" ? `• Price: ${item.price}` : `• Precio: ${item.price}`;
 
   const outro = locale === "en" ? "Is it available?" : "¿Está disponible?";
 

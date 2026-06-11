@@ -1,11 +1,6 @@
 import type { CartItem } from "@/lib/cart";
-import {
-  createOrderId,
-  getLastOrder,
-  placeOrder,
-  type Order,
-  type OrderStatus,
-} from "@/lib/orders";
+import { createOrderId, type Order, type OrderStatus } from "@/lib/orders";
+import { fetchLastOrder, placeOrder } from "@/lib/orders/orders-browser";
 
 /** @deprecated Usa `Order` desde `@/lib/orders`. */
 export type Reservation = Order;
@@ -16,17 +11,17 @@ export function createReservationId(): string {
   return createOrderId();
 }
 
-export function saveReservation(
+export async function saveReservation(
   data: Pick<
     Reservation,
     "items" | "total" | "customerName" | "customerPhone" | "customerEmail"
   > & { customerId?: string },
-): Reservation {
+): Promise<Reservation> {
   return placeOrder(data);
 }
 
-export function getLastReservation(): Reservation | null {
-  return getLastOrder();
+export async function getLastReservation(): Promise<Reservation | null> {
+  return fetchLastOrder();
 }
 
 export function clearLastReservation(): void {

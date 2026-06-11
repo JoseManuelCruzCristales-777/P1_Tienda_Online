@@ -137,11 +137,17 @@
   * {
     border-color: var(--color-border);
   }
-  html, body {
+  html {
+    -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
+  }
+  html,
+  body {
     background-color: var(--color-background);
     color: var(--color-on-background);
     font-family: "Inter", sans-serif;
     -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
   }
   .material-symbols-outlined {
     font-family: "Material Symbols Outlined";
@@ -157,23 +163,44 @@
     direction: ltr;
     overflow: hidden;
     font-feature-settings: "liga";
-    font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+    font-variation-settings:
+      "FILL" 0,
+      "wght" 400,
+      "GRAD" 0,
+      "opsz" 24;
     -webkit-font-feature-settings: "liga";
     -webkit-font-smoothing: antialiased;
   }
 }
 
 @layer utilities {
-  .hide-scrollbar::-webkit-scrollbar { display: none; }
-  .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
   .glass-panel {
     background: rgba(255, 255, 255, 0.7);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.5);
   }
+  .pb-safe {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+  }
+  .bottom-safe {
+    bottom: max(1.5rem, calc(env(safe-area-inset-bottom, 0px) + 1rem));
+  }
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
 }
 
 @keyframes shimmer {
-  100% { transform: skewX(-12deg) translateX(200%); }
+  100% {
+    transform: skewX(-12deg) translateX(200%);
+  }
 }

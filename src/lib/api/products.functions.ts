@@ -9,14 +9,20 @@ import {
   updateProduct,
 } from "../catalog/products.repository.server";
 
+const productVariantSchema = z.object({
+  size: z.string().min(1),
+  stock: z.number().int().min(0),
+});
+
 const productInputSchema = z.object({
   title: z.string().min(1),
   price: z.string().min(1),
-  imageUrl: z.string().url(),
+  imageUrl: z.string().min(1),
   description: z.string().min(1),
   category: z.string().min(1),
   layoutRole: z.enum(["featured", "standard"]),
   featuredLabel: z.string().optional(),
+  variants: z.array(productVariantSchema).min(1),
 });
 
 const adminTokenSchema = z.object({
@@ -83,4 +89,23 @@ export const deleteCatalogProduct = createServerFn({ method: "POST" })
       throw new Error("Product not found");
     }
     return { ok: true as const };
+  });
+
+const uploadImageSchema = adminTokenSchema.extend({
+  fileName: z.string().min(1),
+  mimeType: z.enum(["image/jpeg", "image/png", "image/webp", "image/gif"]),
+  dataBase64: z.string().min(1),
+});
+
+export const uploadProductImage = createServerFn({ method: "POST" })
+  .inputValidator(uploadImageSchema)
+  .handler(async ({ data }) => {
+    await requireAdminToken(data.adminToken);
+    const { uploadProductImage: upload } = await import("../catalog/product-images.server");
+    const publicUrl = await upload({
+      fileName: data.fileName,
+      mimeType: data.mimeType,
+      dataBase64: data.dataBase64,
+    });
+    return { url: publicUrl };
   });

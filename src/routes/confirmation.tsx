@@ -6,7 +6,7 @@ import { SiteFooter, SiteHeader } from "@/components/SiteChrome";
 import { OrderStatusBadge } from "@/components/orders/OrderStatusBadge";
 import { homeSearch } from "@/lib/home-search";
 import { useI18n } from "@/lib/i18n/I18nProvider";
-import { formatOrderId, getLastOrder, type Order } from "@/lib/orders";
+import { formatOrderId, type Order } from "@/lib/orders";
 import { buildCartWhatsAppUrl, openWhatsApp } from "@/lib/whatsapp";
 
 export const Route = createFileRoute("/confirmation")({
@@ -27,13 +27,23 @@ function Confirmation() {
   const [checked, setChecked] = useState(false);
 
   useEffect(() => {
-    const data = getLastOrder();
-    if (!data) {
-      void navigate({ to: "/", search: homeSearch });
-      return;
-    }
-    setOrder(data);
-    setChecked(true);
+    let cancelled = false;
+
+    void (async () => {
+      const { fetchLastOrder } = await import("@/lib/orders/orders-browser");
+      const data = await fetchLastOrder();
+      if (cancelled) return;
+      if (!data) {
+        void navigate({ to: "/", search: homeSearch });
+        return;
+      }
+      setOrder(data);
+      setChecked(true);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [navigate]);
 
   function handleOpenWhatsApp() {
@@ -68,7 +78,10 @@ function Confirmation() {
       <SiteHeader />
 
       <div className="mx-auto w-full max-w-container-max px-margin-mobile py-4 md:px-margin-desktop">
-        <nav aria-label="Breadcrumb" className="flex items-center gap-1 text-sm text-on-surface-variant">
+        <nav
+          aria-label="Breadcrumb"
+          className="flex items-center gap-1 text-sm text-on-surface-variant"
+        >
           <Link to="/" search={homeSearch} className="transition-colors hover:text-primary">
             {t("confirmation_home")}
           </Link>
@@ -101,18 +114,24 @@ function Confirmation() {
 
             <div className="mb-stack-lg grid w-full grid-cols-1 gap-stack-md rounded-lg border border-surface-variant bg-surface-container-lowest p-stack-md text-left shadow-sm md:grid-cols-2">
               <div className="flex flex-col gap-2">
-                <span className="font-label-md text-label-md text-outline">{t("confirmation_id")}</span>
+                <span className="font-label-md text-label-md text-outline">
+                  {t("confirmation_id")}
+                </span>
                 <span className="font-body-md text-body-md font-medium tracking-wide text-primary">
                   {formatOrderId(order.id)}
                 </span>
               </div>
               <div className="flex flex-col gap-2">
-                <span className="font-label-md text-label-md text-outline">{t("confirmation_status")}</span>
+                <span className="font-label-md text-label-md text-outline">
+                  {t("confirmation_status")}
+                </span>
                 <OrderStatusBadge status={order.status} />
               </div>
 
               <div className="md:col-span-2">
-                <span className="font-label-md text-label-md text-outline">{t("confirmation_items")}</span>
+                <span className="font-label-md text-label-md text-outline">
+                  {t("confirmation_items")}
+                </span>
                 <ul className="mt-2 flex flex-col gap-1 font-body-md text-body-md text-on-surface-variant">
                   {order.items.map((item) => (
                     <li key={item.id}>

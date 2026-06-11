@@ -10,20 +10,20 @@ const tokenSchema = z.object({
   adminToken: z.string().min(1),
 });
 
-export type AdminLoginResult =
-  | { ok: true; token: string }
-  | { ok: false; error: string };
+export type AdminLoginResult = { ok: true; token: string } | { ok: false; error: string };
 
 /** Credenciales admin → token de sesión (persistido en data/admin-sessions.json). */
 export const loginAdmin = createServerFn({ method: "POST" })
   .inputValidator(credentialsSchema)
   .handler(async ({ data }): Promise<AdminLoginResult> => {
-    const { getAdminCredentials, issueAdminSession } = await import(
-      "../auth/admin-sessions.server"
-    );
+    const { getAdminCredentials, issueAdminSession } =
+      await import("../auth/admin-sessions.server");
     const creds = getAdminCredentials();
-    if (data.username !== creds.username || data.password !== creds.password) {
-      return { ok: false, error: "Invalid credentials" };
+    const username = data.username.trim();
+    const password = data.password;
+
+    if (username !== creds.username || password !== creds.password) {
+      return { ok: false, error: "Credenciales incorrectas." };
     }
     return { ok: true, token: issueAdminSession() };
   });

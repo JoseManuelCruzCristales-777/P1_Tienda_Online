@@ -1,10 +1,6 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 
-import {
-  buildStoreWhatsAppUrl,
-  formatWhatsAppDisplayNumber,
-  openWhatsApp,
-} from "@/lib/whatsapp";
+import { buildStoreWhatsAppUrl, formatWhatsAppDisplayNumber, openWhatsApp } from "@/lib/whatsapp";
 import {
   formatStoreAddress,
   STORE_EMAIL,
@@ -43,8 +39,6 @@ import type { CustomerSession } from "@/lib/session";
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers de localStorage — con guardia SSR para TanStack Start.
 // En el servidor `window` no existe; estas funciones retornan valores neutros.
-// TODO: cuando conectes Supabase Auth, estos helpers se reemplazarán por
-//       `supabase.auth.getSession()` y `supabase.auth.onAuthStateChange()`.
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Lee cuántos productos hay en la lista de deseos. */
@@ -175,26 +169,53 @@ export function SiteHeader() {
   // Empieza en null (servidor no tiene acceso a localStorage).
   // Se hidrata en el cliente al montar y se actualiza con el evento "auth-updated"
   // que disparan /login y /register tras un inicio de sesión exitoso.
-  // TODO: reemplazar readSession() con supabase.auth.getSession() +
-  //       supabase.auth.onAuthStateChange() cuando conectes Supabase.
   const [currentUser, setCurrentUser] = useState<CustomerSession | null>(null);
 
   useEffect(() => {
-    // Hidratación inicial
-    setCurrentUser(readSession());
+    let cancelled = false;
+    let unsubscribeAuth: (() => void) | undefined;
 
-    // Actualiza el header en tiempo real cuando la sesión cambia
-    const syncAuth = () => setCurrentUser(readSession());
+    const syncFromStorage = () => setCurrentUser(readSession());
+    syncFromStorage();
+
+    const syncAuth = () => syncFromStorage();
     window.addEventListener("auth-updated", syncAuth);
-    return () => window.removeEventListener("auth-updated", syncAuth);
+
+    void (async () => {
+      if (readSession()) return;
+
+      const { syncCustomerSessionFromSupabase } = await import("@/lib/auth/customer-auth");
+      const restored = await syncCustomerSessionFromSupabase();
+      if (!cancelled && restored) setCurrentUser(restored);
+    })();
+
+    void (async () => {
+      const { getSupabase } = await import("@/lib/supabase/client");
+      const supabase = getSupabase();
+      const { data: listener } = supabase.auth.onAuthStateChange((_event, authSession) => {
+        if (!authSession?.user) {
+          setCurrentUser(null);
+          return;
+        }
+        setCurrentUser(readSession());
+      });
+      unsubscribeAuth = () => listener.subscription.unsubscribe();
+    })();
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener("auth-updated", syncAuth);
+      unsubscribeAuth?.();
+    };
   }, []);
 
-  // Limpia sesión + carrito, notifica al header y redirige al inicio
-  function handleLogout() {
-    localStorage.removeItem("rousse-session");
+  async function handleLogout() {
+    const { signOutCustomer } = await import("@/lib/auth/customer-auth");
+    const { clearAdminToken } = await import("@/lib/auth/admin-session");
+    await signOutCustomer();
+    clearAdminToken();
     localStorage.removeItem("rousse-cart");
 
-    // Notifica a todos los listeners para que actualicen su estado reactivo
     window.dispatchEvent(new Event("auth-updated"));
     window.dispatchEvent(new Event("cart-updated"));
 
@@ -203,11 +224,9 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-50 w-full bg-surface shadow-[0_10px_30px_rgba(0,0,0,0.04)]">
-      <div className="mx-auto flex w-full max-w-container-max flex-col px-margin-mobile py-4 md:px-margin-desktop">
-
+      <div className="mx-auto flex w-full max-w-container-max flex-col px-4 py-3 sm:px-margin-mobile sm:py-4 md:px-margin-desktop">
         {/* ── Fila superior: Logo + Buscador + Iconos de acción ── */}
         <div className="flex w-full items-center gap-3 md:gap-4 lg:gap-5">
-
           {/* Logo — lleva al inicio limpiando categoría y búsqueda */}
           <Link
             to="/"
@@ -219,7 +238,7 @@ export function SiteHeader() {
               alt="Rousse Shopping"
               className="h-10 w-10 shrink-0 rounded-full object-cover"
             />
-            <span className="hidden font-headline-lg text-headline-lg font-medium tracking-tight text-primary sm:block">
+            <span className="max-w-[9rem] truncate font-headline-lg text-base font-medium tracking-tight text-primary sm:max-w-none sm:text-headline-lg">
               {t("brand")}
             </span>
           </Link>
@@ -275,9 +294,7 @@ export function SiteHeader() {
               aria-label={
                 wishlistCount > 0
                   ? t(
-                      wishlistCount === 1
-                        ? "wishlist_aria_count_one"
-                        : "wishlist_aria_count_other",
+                      wishlistCount === 1 ? "wishlist_aria_count_one" : "wishlist_aria_count_other",
                       { count: wishlistCount },
                     )
                   : t("wishlist_aria")
@@ -313,9 +330,15 @@ export function SiteHeader() {
             </Link>
             {/* ── Perfil: condicional según sesión activa ── */}
             {currentUser ? (
-              // ── AUTENTICADO: saludo + botón de logout ──────────────────────
-              <div className="flex items-center gap-2">
-                {/* Avatar inicial + nombre (solo desktop) */}
+              // ── AUTENTICADO: compacto en móvil, completo en desktop ───────
+              <div className="flex items-center gap-1 sm:gap-2">
+                <Link
+                  to="/my-orders"
+                  aria-label={t("nav_my_orders")}
+                  className="touch-target flex items-center justify-center text-on-surface-variant transition-colors hover:text-primary sm:hidden"
+                >
+                  <ClipboardList aria-hidden className="size-5 stroke-[1.5]" />
+                </Link>
                 <Link
                   to="/my-orders"
                   className="hidden items-center gap-1.5 text-sm font-medium text-on-surface-variant transition-colors hover:text-primary sm:flex"
@@ -324,22 +347,22 @@ export function SiteHeader() {
                   <ClipboardList aria-hidden className="size-4 stroke-[1.5]" />
                   <span className="max-w-[100px] truncate">{t("nav_my_orders")}</span>
                 </Link>
-                <div className="flex items-center gap-2">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-on-primary">
-                    {currentUser.name.charAt(0).toUpperCase()}
-                  </div>
-                  <span className="hidden max-w-[120px] truncate text-sm font-medium text-primary md:block">
-                    {t("hello_user", { name: currentUser.name.split(" ")[0] })}
-                  </span>
-                </div>
-
-                {/* Botón logout — icono siempre visible, tooltip en hover */}
+                <Link
+                  to="/my-orders"
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-on-primary sm:h-9 sm:w-9"
+                  aria-label={t("hello_user", { name: currentUser.name.split(" ")[0] })}
+                >
+                  {currentUser.name.charAt(0).toUpperCase()}
+                </Link>
+                <span className="hidden max-w-[120px] truncate text-sm font-medium text-primary md:block">
+                  {t("hello_user", { name: currentUser.name.split(" ")[0] })}
+                </span>
                 <button
                   type="button"
                   onClick={handleLogout}
                   aria-label={t("logout_aria")}
                   title={t("logout_aria")}
-                  className="flex items-center gap-1.5 rounded-full border border-outline-variant px-2 py-1.5 text-on-surface-variant transition-colors hover:border-error/40 hover:bg-error/5 hover:text-error"
+                  className="touch-target flex items-center justify-center rounded-full border border-outline-variant p-2 text-on-surface-variant transition-colors hover:border-error/40 hover:bg-error/5 hover:text-error sm:gap-1.5 sm:px-2 sm:py-1.5"
                 >
                   <LogOut aria-hidden className="size-4 stroke-[1.5]" />
                   <span className="hidden text-xs font-medium sm:block">{t("logout_btn")}</span>
@@ -404,6 +427,44 @@ export function SiteHeader() {
         {/* Selector de idioma visible solo en móvil (debajo del buscador o en la fila superior) */}
         <LanguageSwitcher className="mt-3 sm:hidden" />
 
+        {/* ── Categorías en móvil: scroll horizontal con chips táctiles ── */}
+        <nav
+          aria-label="Categorías de la tienda"
+          className="hide-scrollbar -mx-4 mt-3 flex gap-2 overflow-x-auto px-4 pb-1 md:hidden"
+        >
+          <Link
+            to="/"
+            search={{ category: undefined, q: undefined }}
+            className={cn(
+              "shrink-0 rounded-full border px-3.5 py-2 text-xs font-semibold uppercase tracking-wide transition-colors",
+              isHome && !activeCategory
+                ? "border-primary bg-primary text-on-primary"
+                : "border-outline-variant bg-surface-container-low text-on-surface-variant",
+            )}
+          >
+            {t("nav_all")}
+          </Link>
+          {navItems.map((item) => {
+            const isActive = isHome && activeCategory === item.category;
+            return (
+              <Link
+                key={item.category}
+                to="/"
+                search={{ category: item.category, q: undefined }}
+                className={cn(
+                  "flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-2 text-xs font-semibold uppercase tracking-wide transition-colors",
+                  isActive
+                    ? "border-primary bg-primary text-on-primary"
+                    : "border-outline-variant bg-surface-container-low text-on-surface-variant",
+                )}
+              >
+                <item.Icon aria-hidden className="size-3.5 stroke-[1.5]" />
+                {t(item.labelKey)}
+              </Link>
+            );
+          })}
+        </nav>
+
         {/* ── Fila inferior: Nav de categorías ── */}
         {/*
          * Cada Link navega a /?category=X (sin recargar la página).
@@ -445,7 +506,6 @@ export function SiteHeader() {
             })}
           </ul>
         </nav>
-
       </div>
     </header>
   );
@@ -457,7 +517,7 @@ export function SiteFooter() {
 
   return (
     <footer className="mt-auto w-full border-t border-surface-container-highest bg-surface-container">
-      <div className="mx-auto grid w-full max-w-container-max grid-cols-1 gap-stack-lg px-margin-mobile py-stack-lg md:grid-cols-3 md:px-margin-desktop">
+      <div className="mx-auto grid w-full max-w-container-max grid-cols-1 gap-8 px-4 py-10 sm:gap-stack-lg sm:px-margin-mobile sm:py-stack-lg md:grid-cols-3 md:px-margin-desktop">
         <div className="flex flex-col gap-6">
           <span className="font-headline-md text-headline-md font-bold text-primary">
             {t("brand")}

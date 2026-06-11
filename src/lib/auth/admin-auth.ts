@@ -5,10 +5,7 @@ export function isUnauthorizedError(err: unknown): boolean {
   return /unauthorized|not authenticated/i.test(message);
 }
 
-export function handleAdminAuthFailure(
-  err: unknown,
-  onSessionExpired: () => void,
-): boolean {
+export function handleAdminAuthFailure(err: unknown, onSessionExpired: () => void): boolean {
   if (!isUnauthorizedError(err)) return false;
   clearAdminToken();
   onSessionExpired();

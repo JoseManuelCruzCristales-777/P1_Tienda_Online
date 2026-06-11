@@ -12,6 +12,7 @@ export const seedProducts: Product[] = [
     category: "Perfumes",
     layoutRole: "featured",
     featuredLabel: "Exclusive Fragrance",
+    variants: [{ size: "Única", stock: 12 }],
   },
   {
     id: "verona-leather-tote",
@@ -23,6 +24,11 @@ export const seedProducts: Product[] = [
       "Structured full-grain leather tote with brushed gold hardware. Spacious interior for day-to-evening transitions.",
     category: "Boutique",
     layoutRole: "standard",
+    variants: [
+      { size: "CH", stock: 3 },
+      { size: "M", stock: 5 },
+      { size: "G", stock: 2 },
+    ],
   },
   {
     id: "chronograph-gold-series",
@@ -34,6 +40,7 @@ export const seedProducts: Product[] = [
       "Swiss-inspired chronograph with sapphire crystal and gold-tone case. Water resistant to 50 meters.",
     category: "Accessories",
     layoutRole: "standard",
+    variants: [{ size: "Única", stock: 8 }],
   },
   {
     id: "aura-aviators",
@@ -41,10 +48,10 @@ export const seedProducts: Product[] = [
     price: "$210.00",
     imageUrl:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuB-r_83XItIv1O_kaeb0bviyMwfr-VcajmacWGqIELZ7zz9Q4e1aKKJ8HM2uf5KyEpzfG-UR_klHu56xzYYxqsYHyhPBvm-TIDDvee9bno_qwEETFbuYIJzIvnkOC9aFcLH3zk8HVZ5YIMtJ1N6QYtFK4e-10EZspsr72aUMyyc2V7OmkSarGXfhOkFTg1ivoQ59Sw5ql5WVZ6p-_UT9MM7o3qXAxo94SKO52dCYtBtkfKxtVEQoJxKVJ5lNnJfeajkrNKZONpvJ7k",
-    description:
-      "Lightweight titanium aviators with polarized lenses and anti-reflective coating.",
+    description: "Lightweight titanium aviators with polarized lenses and anti-reflective coating.",
     category: "Accessories",
     layoutRole: "standard",
+    variants: [{ size: "Única", stock: 15 }],
   },
   {
     id: "signature-tote",
@@ -56,5 +63,9 @@ export const seedProducts: Product[] = [
       "Crafted from the finest full-grain calf leather, the Signature Tote embodies timeless elegance and modern functionality.",
     category: "Boutique",
     layoutRole: "standard",
+    variants: [
+      { size: "M", stock: 4 },
+      { size: "G", stock: 6 },
+    ],
   },
 ];

@@ -55,7 +55,8 @@ export const Route = createFileRoute("/")({
       { title: "Rousse Shopping | Catálogo Premium" },
       {
         name: "description",
-        content: "Descubre la Colección Otoño — moda, fragancias y accesorios exclusivos en Oaxaca.",
+        content:
+          "Descubre la Colección Otoño — moda, fragancias y accesorios exclusivos en Oaxaca.",
       },
       { property: "og:title", content: "Rousse Shopping | Catálogo Premium" },
     ],
@@ -107,10 +108,7 @@ function Index() {
   // useProducts() usa React Query: devuelve caché instantáneo en re-renders.
   const { data: allProducts = [], isLoading, error } = useProducts();
 
-  const catalogBounds = useMemo(
-    () => getCatalogPriceBounds(allProducts),
-    [allProducts],
-  );
+  const catalogBounds = useMemo(() => getCatalogPriceBounds(allProducts), [allProducts]);
 
   const priceRange = useMemo(
     () => resolvePriceFilterRange(minPriceInput, maxPriceInput),
@@ -143,8 +141,7 @@ function Index() {
     (parsePriceFilterInput(minPriceInput) ?? DEFAULT_PRICE_FILTER_MIN) > DEFAULT_PRICE_FILTER_MIN ||
     parsePriceFilterInput(maxPriceInput) !== null;
 
-  const hasActiveFilters =
-    !!searchTerm || selectedCategory !== null || hasPriceFilter;
+  const hasActiveFilters = !!searchTerm || selectedCategory !== null || hasPriceFilter;
 
   // Resetea TODOS los filtros: borra URL params y restaura precios por defecto
   const clearFilters = () => {
@@ -162,9 +159,8 @@ function Index() {
       <SiteHeader />
 
       <main className="mx-auto w-full max-w-container-max flex-grow pb-stack-lg">
-
         {/* ── HERO ── imagen de fondo con overlay y CTA principal ── */}
-        <section className="group relative mb-stack-lg h-[600px] w-full overflow-hidden bg-surface-container-low">
+        <section className="group relative mb-8 h-[min(72vh,28rem)] w-full overflow-hidden bg-surface-container-low sm:mb-stack-lg sm:h-[min(68vh,32rem)] md:h-[600px]">
           {/* Imagen de fondo con zoom suave al hacer hover */}
           <div
             className="absolute inset-0 h-full w-full bg-cover bg-center transition-transform duration-1000 group-hover:scale-105"
@@ -177,33 +173,35 @@ function Index() {
           </div>
 
           {/* Contenido centrado sobre la imagen */}
-          <div className="relative z-10 mx-auto flex h-full max-w-4xl flex-col items-center justify-center px-6 text-center md:px-20">
-            <span className="mb-4 rounded bg-black/30 px-3 py-1 font-label-md text-label-md uppercase tracking-widest text-secondary-fixed backdrop-blur-sm">
+          <div className="relative z-10 mx-auto flex h-full max-w-4xl flex-col items-center justify-center px-4 text-center sm:px-6 md:px-20">
+            <span className="mb-3 rounded bg-black/30 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-secondary-fixed backdrop-blur-sm sm:mb-4 sm:text-label-md">
               {t("hero_badge")}
             </span>
-            <h1 className="mb-6 font-headline-xl text-headline-xl text-on-primary drop-shadow-md">
+            <h1 className="mb-4 font-headline-xl text-[1.75rem] leading-tight text-on-primary drop-shadow-md sm:mb-6 sm:text-headline-lg-mobile md:text-headline-xl md:leading-[56px]">
               {t("hero_title_1")}
               <br />
               {t("hero_title_2")}
             </h1>
-            <p className="mb-10 max-w-2xl font-body-lg text-body-lg text-surface-bright drop-shadow-sm">
+            <p className="mb-6 max-w-2xl text-sm leading-relaxed text-surface-bright drop-shadow-sm sm:mb-10 sm:text-body-lg">
               {t("hero_subtitle")}
             </p>
-            <div className="flex flex-wrap justify-center gap-4">
+            <div className="flex w-full max-w-sm flex-col gap-3 sm:max-w-none sm:flex-row sm:flex-wrap sm:justify-center sm:gap-4">
               {shopTarget ? (
                 <Link
                   to="/product/$productId"
                   params={{ productId: shopTarget.id }}
-                  className="bg-primary px-8 py-4 font-label-md text-label-md uppercase text-on-primary shadow-lg transition-colors hover:bg-primary-container"
+                  className="touch-target flex items-center justify-center rounded-full bg-primary px-6 py-3.5 text-sm font-semibold uppercase tracking-wide text-on-primary shadow-lg transition-colors hover:bg-primary-container sm:rounded-none sm:px-8 sm:py-4"
                 >
                   {t("hero_shop")}
                 </Link>
               ) : null}
-              {/* Abre el panel de filtros y hace scroll al catálogo */}
               <button
                 type="button"
-                onClick={() => setShowFilters(true)}
-                className="border border-on-primary bg-transparent px-8 py-4 font-label-md text-label-md uppercase text-on-primary backdrop-blur-sm transition-colors hover:bg-white/10"
+                onClick={() => {
+                  setShowFilters(true);
+                  document.getElementById("catalog-section")?.scrollIntoView({ behavior: "smooth" });
+                }}
+                className="touch-target flex items-center justify-center rounded-full border border-on-primary bg-transparent px-6 py-3.5 text-sm font-semibold uppercase tracking-wide text-on-primary backdrop-blur-sm transition-colors hover:bg-white/10 sm:rounded-none sm:px-8 sm:py-4"
               >
                 {t("hero_explore")}
               </button>
@@ -212,10 +210,11 @@ function Index() {
         </section>
 
         {/* ── SECCIÓN CATÁLOGO ── */}
-        <section className="mb-stack-lg px-margin-mobile md:px-margin-desktop">
-
-          {/* Encabezado: título + contador de resultados + botones de filtro */}
-          <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+        <section
+          id="catalog-section"
+          className="mb-stack-lg scroll-mt-36 px-4 sm:px-margin-mobile md:px-margin-desktop"
+        >
+          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
             <div>
               <h2 className="mb-1 font-headline-lg text-headline-lg text-primary">
                 {searchTerm
@@ -231,7 +230,7 @@ function Index() {
               </p>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               {/* Botón que abre/cierra el panel de filtros */}
               <button
                 type="button"
@@ -265,19 +264,17 @@ function Index() {
 
               <Link
                 to="/product"
-                className="hidden items-center gap-1 border-b border-transparent pb-1 font-label-md text-label-md uppercase text-primary transition-colors hover:border-secondary hover:text-secondary md:flex"
+                className="flex items-center gap-1 border-b border-transparent pb-1 text-xs font-semibold uppercase tracking-wide text-primary transition-colors hover:border-secondary hover:text-secondary sm:text-label-md"
               >
-                {t("catalog_view_all")}{" "}
-                <ArrowRight className="size-4 stroke-[1.5]" aria-hidden />
+                {t("catalog_view_all")} <ArrowRight className="size-4 stroke-[1.5]" aria-hidden />
               </Link>
             </div>
           </div>
 
           {/* ── PANEL DE FILTROS (colapsable) ── */}
           {showFilters && (
-            <div className="mb-8 rounded-xl border border-surface-container-highest bg-surface p-5 shadow-sm">
+            <div className="mb-8 rounded-xl border border-surface-container-highest bg-surface p-4 shadow-sm sm:p-5">
               <div className="flex flex-col gap-6 md:flex-row md:items-start md:gap-10">
-
                 {/* Chips de categoría — al hacer clic actualiza la URL */}
                 <div className="flex-1">
                   <p className="mb-3 font-label-md text-xs uppercase tracking-widest text-on-surface-variant">
@@ -314,7 +311,7 @@ function Index() {
                 </div>
 
                 {/* Rango de precio: escribe cualquier monto; máximo vacío = sin tope */}
-                <div className="min-w-[280px] flex-1">
+                <div className="min-w-0 flex-1 md:min-w-[280px]">
                   <p className="mb-1 font-label-md text-xs uppercase tracking-widest text-on-surface-variant">
                     {t("catalog_price_range")}
                   </p>
@@ -380,15 +377,13 @@ function Index() {
 
           {/* Esqueleto de carga: 8 tarjetas grises animadas */}
           {isLoading ? (
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
               {Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="h-[300px] animate-pulse rounded bg-surface-container-low" />
+                <div key={i} className="h-[240px] animate-pulse rounded bg-surface-container-low sm:h-[300px]" />
               ))}
             </div>
-
           ) : error ? (
             <p className="text-error">{t("catalog_error")}</p>
-
           ) : filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
               <p className="font-headline-md text-headline-md text-on-surface-variant">
@@ -405,7 +400,6 @@ function Index() {
                 {t("catalog_clear_filters")}
               </button>
             </div>
-
           ) : (
             /*
              * GRID DE PRODUCTOS
@@ -413,12 +407,10 @@ function Index() {
              * - auto-rows-[280px]: altura fija por fila para consistencia visual
              * - El producto "featured" ocupa 2 columnas × 2 filas (col-span-2 row-span-2)
              */
-            <div className="grid auto-rows-[280px] grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
-
-              {/* Tarjeta destacada — siempre primera, ocupa el doble de espacio */}
+            <div className="grid grid-cols-2 gap-3 sm:auto-rows-[260px] sm:gap-4 md:auto-rows-[280px] md:grid-cols-4 md:gap-6">
               {featured ? (
-                <div className="col-span-2 row-span-2">
-                  <FeaturedProductCard product={featured} className="h-full" />
+                <div className="col-span-2 row-span-1 min-h-[280px] sm:row-span-2 sm:min-h-0">
+                  <FeaturedProductCard product={featured} className="h-full min-h-[280px] sm:min-h-0" />
                 </div>
               ) : null}
 
@@ -429,7 +421,7 @@ function Index() {
 
               {/* Banner VIP — solo visible cuando no hay filtros activos */}
               {!hasActiveFilters && (
-                <div className="col-span-2 flex flex-col items-center justify-center gap-4 rounded bg-primary p-6 text-center shadow-sm transition-shadow hover:shadow-md md:col-span-1">
+                <div className="col-span-2 flex min-h-[220px] flex-col items-center justify-center gap-4 rounded-xl bg-primary p-5 text-center shadow-sm transition-shadow hover:shadow-md sm:min-h-0 sm:p-6 md:col-span-1">
                   <div className="flex h-14 w-14 items-center justify-center rounded-full border border-secondary">
                     <Sparkles className="size-7 stroke-[1.5] text-secondary" aria-hidden />
                   </div>

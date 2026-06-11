@@ -15,6 +15,14 @@ import { homeSearch } from "@/lib/home-search";
 import { I18nProvider, useI18n } from "@/lib/i18n/I18nProvider";
 
 function NotFoundComponent() {
+  return (
+    <I18nProvider>
+      <NotFoundContent />
+    </I18nProvider>
+  );
+}
+
+function NotFoundContent() {
   const { t } = useI18n();
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -38,6 +46,15 @@ function NotFoundComponent() {
 
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
+  return (
+    <I18nProvider>
+      <ErrorContent error={error} reset={reset} />
+    </I18nProvider>
+  );
+}
+
+function ErrorContent({ error, reset }: { error: Error; reset: () => void }) {
+  void error;
   const router = useRouter();
   const { t } = useI18n();
   return (
@@ -47,7 +64,10 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
         <p className="mt-2 text-sm text-on-surface-variant">{t("error_desc")}</p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
-            onClick={() => { router.invalidate(); reset(); }}
+            onClick={() => {
+              router.invalidate();
+              reset();
+            }}
             className="rounded-full bg-primary px-6 py-3 text-sm font-semibold uppercase tracking-widest text-on-primary hover:opacity-90"
           >
             {t("error_retry")}
@@ -71,22 +91,48 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "p1" },
-      { name: "description", content: "Curated premium fashion, exclusive fragrances, and timeless accessories in Oaxaca." },
+      {
+        name: "description",
+        content:
+          "Curated premium fashion, exclusive fragrances, and timeless accessories in Oaxaca.",
+      },
       { property: "og:title", content: "p1" },
-      { property: "og:description", content: "Curated premium fashion, exclusive fragrances, and timeless accessories in Oaxaca." },
+      {
+        property: "og:description",
+        content:
+          "Curated premium fashion, exclusive fragrances, and timeless accessories in Oaxaca.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:title", content: "p1" },
-      { name: "twitter:description", content: "Curated premium fashion, exclusive fragrances, and timeless accessories in Oaxaca." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/8e7a9bde-0c42-4fdb-836d-edb1f34a32da/id-preview-68bdfdad--37c8449d-3fd9-4751-9773-d454d8213bd7.lovable.app-1780190744933.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/8e7a9bde-0c42-4fdb-836d-edb1f34a32da/id-preview-68bdfdad--37c8449d-3fd9-4751-9773-d454d8213bd7.lovable.app-1780190744933.png" },
+      {
+        name: "twitter:description",
+        content:
+          "Curated premium fashion, exclusive fragrances, and timeless accessories in Oaxaca.",
+      },
+      {
+        property: "og:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/8e7a9bde-0c42-4fdb-836d-edb1f34a32da/id-preview-68bdfdad--37c8449d-3fd9-4751-9773-d454d8213bd7.lovable.app-1780190744933.png",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/8e7a9bde-0c42-4fdb-836d-edb1f34a32da/id-preview-68bdfdad--37c8449d-3fd9-4751-9773-d454d8213bd7.lovable.app-1780190744933.png",
+      },
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@300;400;500;600;700&display=swap" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@300;400;500;600;700&display=swap",
+      },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap",
+      },
     ],
   }),
   shellComponent: RootShell,
@@ -102,6 +148,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
+        {/* Provider en el shell: cubre rutas, ErrorComponent y NotFoundComponent */}
         <I18nProvider>{children}</I18nProvider>
         <Scripts />
       </body>

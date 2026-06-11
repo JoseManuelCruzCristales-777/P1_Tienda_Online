@@ -115,8 +115,11 @@ function ProductDetailPage() {
 
   return (
     <StoreShell>
-      <nav aria-label="Breadcrumb" className="mb-8 flex font-label-md text-sm text-on-surface-variant">
-        <ol className="inline-flex items-center space-x-1 md:space-x-3">
+      <nav
+        aria-label="Breadcrumb"
+        className="mb-6 flex overflow-x-auto font-label-md text-xs text-on-surface-variant sm:mb-8 sm:text-sm"
+      >
+        <ol className="inline-flex min-w-0 items-center space-x-1 whitespace-nowrap md:space-x-3">
           <li>
             <Link to="/" search={homeSearch} className="transition-colors hover:text-primary">
               Boutique
@@ -142,7 +145,7 @@ function ProductDetailPage() {
               src={item.imageUrl}
             />
           </div>
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-4 gap-2 sm:gap-4">
             {gallery.map((src, i) => (
               <div
                 key={src}
@@ -270,7 +273,7 @@ function StoreShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <SiteHeader />
-      <main className="mx-auto w-full max-w-container-max px-margin-mobile py-12 md:px-margin-desktop md:py-stack-lg">
+      <main className="mx-auto w-full max-w-container-max px-4 py-8 pb-safe sm:px-margin-mobile sm:py-12 md:px-margin-desktop md:py-stack-lg">
         {children}
       </main>
       <SiteFooter />

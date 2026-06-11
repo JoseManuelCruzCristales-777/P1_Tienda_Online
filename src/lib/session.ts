@@ -1,6 +1,5 @@
 // ---------------------------------------------------------------------------
-// Customer session helpers — persisted in localStorage under "rousse-session".
-// This is a mock session layer; replace with Supabase Auth when ready.
+// Customer session cache — sincronizado con Supabase Auth vía customer-auth.ts.
 // ---------------------------------------------------------------------------
 
 const SESSION_KEY = "rousse-session";

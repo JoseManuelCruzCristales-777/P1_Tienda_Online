@@ -1,4 +1,9 @@
+import { useState } from "react";
+
+import { ProductImageField } from "@/components/admin/ProductImageField";
+import { ProductVariantsField } from "@/components/admin/ProductVariantsField";
 import type { ProductFormValues } from "@/lib/catalog/types";
+import { validateProductVariants } from "@/lib/catalog/variants";
 import { useI18n } from "@/lib/i18n/I18nProvider";
 import { CATEGORY_LABEL_KEYS, FILTER_CATEGORIES } from "@/lib/i18n/translations";
 
@@ -22,13 +27,25 @@ export function ProductForm({
   success,
 }: ProductFormProps) {
   const { t } = useI18n();
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   const update = <K extends keyof ProductFormValues>(key: K, value: ProductFormValues[K]) => {
     onChange({ ...values, [key]: value });
   };
 
+  const handleFormSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    const variantError = validateProductVariants(values.variants, { t });
+    if (variantError) {
+      setValidationError(variantError);
+      return;
+    }
+    setValidationError(null);
+    onSubmit(event);
+  };
+
   return (
-    <form onSubmit={onSubmit} className="flex max-w-2xl flex-col gap-6">
+    <form onSubmit={handleFormSubmit} className="flex max-w-3xl flex-col gap-8">
       {success ? (
         <p
           role="status"
@@ -38,15 +55,21 @@ export function ProductForm({
         </p>
       ) : null}
 
-      {error ? (
+      {error || validationError ? (
         <p className="rounded-lg border border-error/30 bg-error-container px-4 py-3 text-sm text-error">
-          {error}
+          {validationError ?? error}
         </p>
       ) : null}
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="rounded-xl border border-surface-container-highest bg-surface-container-lowest p-5 shadow-sm sm:p-6">
+        <h2 className="mb-4 font-headline-md text-base text-primary sm:text-headline-md">
+          {t("admin_form_section_details")}
+        </h2>
+        <div className="grid gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-2 sm:col-span-2">
-          <span className="text-label-md uppercase text-on-surface-variant">{t("admin_form_title")}</span>
+          <span className="text-label-md uppercase text-on-surface-variant">
+            {t("admin_form_title")}
+          </span>
           <input
             required
             value={values.title}
@@ -56,7 +79,9 @@ export function ProductForm({
         </label>
 
         <label className="flex flex-col gap-2">
-          <span className="text-label-md uppercase text-on-surface-variant">{t("admin_form_price")}</span>
+          <span className="text-label-md uppercase text-on-surface-variant">
+            {t("admin_form_price")}
+          </span>
           <input
             required
             value={values.price}
@@ -67,7 +92,9 @@ export function ProductForm({
         </label>
 
         <label className="flex flex-col gap-2">
-          <span className="text-label-md uppercase text-on-surface-variant">{t("admin_form_category")}</span>
+          <span className="text-label-md uppercase text-on-surface-variant">
+            {t("admin_form_category")}
+          </span>
           <select
             value={values.category}
             onChange={(e) => update("category", e.target.value)}
@@ -81,16 +108,10 @@ export function ProductForm({
           </select>
         </label>
 
-        <label className="flex flex-col gap-2 sm:col-span-2">
-          <span className="text-label-md uppercase text-on-surface-variant">{t("admin_form_image")}</span>
-          <input
-            required
-            type="url"
-            value={values.imageUrl}
-            onChange={(e) => update("imageUrl", e.target.value)}
-            className="rounded-lg border border-outline-variant bg-surface-container-low px-4 py-3 text-body-md outline-none focus:border-primary"
-          />
-        </label>
+        <ProductImageField
+          value={values.imageUrl}
+          onChange={(url) => update("imageUrl", url)}
+        />
 
         <label className="flex flex-col gap-2 sm:col-span-2">
           <span className="text-label-md uppercase text-on-surface-variant">
@@ -106,10 +127,14 @@ export function ProductForm({
         </label>
 
         <label className="flex flex-col gap-2">
-          <span className="text-label-md uppercase text-on-surface-variant">{t("admin_form_layout")}</span>
+          <span className="text-label-md uppercase text-on-surface-variant">
+            {t("admin_form_layout")}
+          </span>
           <select
             value={values.layoutRole}
-            onChange={(e) => update("layoutRole", e.target.value as ProductFormValues["layoutRole"])}
+            onChange={(e) =>
+              update("layoutRole", e.target.value as ProductFormValues["layoutRole"])
+            }
             className="rounded-lg border border-outline-variant bg-surface-container-low px-4 py-3 text-body-md outline-none focus:border-primary"
           >
             <option value="standard">{t("admin_form_layout_standard")}</option>
@@ -128,6 +153,14 @@ export function ProductForm({
             className="rounded-lg border border-outline-variant bg-surface-container-low px-4 py-3 text-body-md outline-none focus:border-primary"
           />
         </label>
+        </div>
+      </div>
+
+      <div className="rounded-xl border border-surface-container-highest bg-surface-container-lowest p-5 shadow-sm sm:p-6">
+        <ProductVariantsField
+          variants={values.variants}
+          onChange={(variants) => update("variants", variants)}
+        />
       </div>
 
       <button

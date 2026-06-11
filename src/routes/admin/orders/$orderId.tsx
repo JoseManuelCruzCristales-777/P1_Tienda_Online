@@ -1,17 +1,12 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, MessageCircle, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import { OrderStatusBadge } from "@/components/orders/OrderStatusBadge";
-import {
-  deleteOrder,
-  formatOrderId,
-  getOrderById,
-  updateOrderStatus,
-  type Order,
-  type OrderStatus,
-} from "@/lib/orders";
+import { handleAdminAuthFailure } from "@/lib/auth/admin-auth";
 import { useI18n } from "@/lib/i18n/I18nProvider";
+import { formatOrderId, type OrderStatus } from "@/lib/orders";
+import { useAdminOrder, useDeleteOrder, useUpdateOrderStatus } from "@/lib/orders/queries";
 import { getWhatsAppNumber } from "@/lib/whatsapp";
 
 export const Route = createFileRoute("/admin/orders/$orderId")({
@@ -23,13 +18,33 @@ const STATUS_OPTIONS: OrderStatus[] = ["pending", "confirmed", "picked_up", "can
 function AdminOrderDetailPage() {
   const { orderId } = Route.useParams();
   const { t, locale } = useI18n();
-  const [order, setOrder] = useState<Order | undefined>(() => getOrderById(orderId));
-
-  useEffect(() => {
-    setOrder(getOrderById(orderId));
-  }, [orderId]);
+  const navigate = useNavigate();
+  const { data: order, isLoading, error } = useAdminOrder(orderId);
+  const updateStatus = useUpdateOrderStatus();
+  const deleteOrder = useDeleteOrder();
 
   const dateLocale = locale === "es" ? "es-MX" : "en-US";
+
+  if (error) {
+    if (
+      handleAdminAuthFailure(error, () => {
+        toast.error(t("admin_session_expired"));
+        void navigate({ to: "/admin/login" });
+      })
+    ) {
+      return null;
+    }
+
+    return (
+      <p className="text-error">
+        {error instanceof Error ? error.message : t("admin_products_error")}
+      </p>
+    );
+  }
+
+  if (isLoading) {
+    return <p className="text-on-surface-variant">{t("admin_products_loading")}</p>;
+  }
 
   if (!order) {
     return (
@@ -50,16 +65,45 @@ function AdminOrderDetailPage() {
   const customerWa = `https://wa.me/52${order.customerPhone.replace(/\D/g, "")}`;
 
   function handleStatusChange(status: OrderStatus) {
-    const updated = updateOrderStatus(order!.id, status);
-    if (updated) setOrder(updated);
+    updateStatus.mutate(
+      { orderId: order!.id, status },
+      {
+        onError: (err) => {
+          if (
+            handleAdminAuthFailure(err, () => {
+              toast.error(t("admin_session_expired"));
+              void navigate({ to: "/admin/login" });
+            })
+          ) {
+            return;
+          }
+          toast.error(err instanceof Error ? err.message : t("admin_products_error"));
+        },
+      },
+    );
   }
 
   function handleDelete() {
     if (!window.confirm(t("admin_orders_delete_confirm", { id: formatOrderId(order!.id) }))) {
       return;
     }
-    deleteOrder(order!.id);
-    window.location.href = "/admin/orders";
+
+    deleteOrder.mutate(order!.id, {
+      onSuccess: () => {
+        window.location.href = "/admin/orders";
+      },
+      onError: (err) => {
+        if (
+          handleAdminAuthFailure(err, () => {
+            toast.error(t("admin_session_expired"));
+            void navigate({ to: "/admin/login" });
+          })
+        ) {
+          return;
+        }
+        toast.error(err instanceof Error ? err.message : t("admin_products_error"));
+      },
+    });
   }
 
   return (
@@ -112,14 +156,11 @@ function AdminOrderDetailPage() {
             </ul>
             <div className="mt-4 flex justify-between border-t border-surface-container-highest pt-4">
               <span className="text-on-surface-variant">
-                {t(
-                  itemCount === 1 ? "admin_orders_items_one" : "admin_orders_items_other",
-                  { count: itemCount },
-                )}
+                {t(itemCount === 1 ? "admin_orders_items_one" : "admin_orders_items_other", {
+                  count: itemCount,
+                })}
               </span>
-              <span className="font-headline-md text-primary">
-                ${order.total.toFixed(2)} MXN
-              </span>
+              <span className="font-headline-md text-primary">${order.total.toFixed(2)} MXN</span>
             </div>
           </section>
         </div>
@@ -137,7 +178,10 @@ function AdminOrderDetailPage() {
               <div>
                 <dt className="text-on-surface-variant">{t("admin_col_email")}</dt>
                 <dd>
-                  <a href={`mailto:${order.customerEmail}`} className="text-primary hover:underline">
+                  <a
+                    href={`mailto:${order.customerEmail}`}
+                    className="text-primary hover:underline"
+                  >
                     {order.customerEmail}
                   </a>
                 </dd>
@@ -178,6 +222,7 @@ function AdminOrderDetailPage() {
             <select
               value={order.status}
               onChange={(e) => handleStatusChange(e.target.value as OrderStatus)}
+              disabled={updateStatus.isPending}
               className="w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface outline-none focus:border-primary focus:ring-1 focus:ring-primary"
             >
               {STATUS_OPTIONS.map((s) => (
@@ -199,7 +244,8 @@ function AdminOrderDetailPage() {
           <button
             type="button"
             onClick={handleDelete}
-            className="flex w-full items-center justify-center gap-2 rounded-full border border-error/40 py-3 text-sm text-error transition-colors hover:bg-error/5"
+            disabled={deleteOrder.isPending}
+            className="flex w-full items-center justify-center gap-2 rounded-full border border-error/40 py-3 text-sm text-error transition-colors hover:bg-error/5 disabled:opacity-50"
           >
             <Trash2 className="size-4" aria-hidden />
             {t("admin_orders_delete")}

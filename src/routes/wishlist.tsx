@@ -47,7 +47,10 @@ function WishlistPage() {
       <SiteHeader />
 
       <div className="mx-auto w-full max-w-container-max px-margin-mobile py-4 md:px-margin-desktop">
-        <nav aria-label="Breadcrumb" className="flex items-center gap-1 text-sm text-on-surface-variant">
+        <nav
+          aria-label="Breadcrumb"
+          className="flex items-center gap-1 text-sm text-on-surface-variant"
+        >
           <Link to="/" search={homeSearch} className="transition-colors hover:text-primary">
             {t("legal_home")}
           </Link>
@@ -69,8 +72,12 @@ function WishlistPage() {
         ) : resolved.length === 0 ? (
           <div className="mt-16 flex flex-col items-center text-center">
             <Heart aria-hidden className="size-12 stroke-[1.5] text-outline-variant" />
-            <p className="mt-4 font-headline-md text-headline-md text-on-surface">{t("wishlist_empty")}</p>
-            <p className="mt-2 max-w-sm text-sm text-on-surface-variant">{t("wishlist_empty_hint")}</p>
+            <p className="mt-4 font-headline-md text-headline-md text-on-surface">
+              {t("wishlist_empty")}
+            </p>
+            <p className="mt-2 max-w-sm text-sm text-on-surface-variant">
+              {t("wishlist_empty_hint")}
+            </p>
             <Link
               to="/"
               search={homeSearch}

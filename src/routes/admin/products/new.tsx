@@ -43,7 +43,9 @@ function AdminNewProductPage() {
 
   return (
     <div>
-      <h1 className="mb-2 font-headline-lg text-headline-lg text-primary">{t("admin_new_title")}</h1>
+      <h1 className="mb-2 font-headline-lg text-headline-lg text-primary">
+        {t("admin_new_title")}
+      </h1>
       <p className="mb-8 text-body-md text-on-surface-variant">{t("admin_new_desc")}</p>
       <ProductForm
         values={values}

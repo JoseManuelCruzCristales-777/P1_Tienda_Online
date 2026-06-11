@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 import { SiteFooter, SiteHeader } from "@/components/SiteChrome";
 import { OrderStatusBadge } from "@/components/orders/OrderStatusBadge";
-import { formatOrderId, getOrdersByCustomerEmail, type Order } from "@/lib/orders";
+import { formatOrderId, type Order } from "@/lib/orders";
 import { homeSearch } from "@/lib/home-search";
 import { useI18n } from "@/lib/i18n/I18nProvider";
 import { getSession } from "@/lib/session";
@@ -32,7 +32,22 @@ function MyOrdersPage() {
       void navigate({ to: "/login" });
       return;
     }
-    setOrders(getOrdersByCustomerEmail(session.email));
+
+    let cancelled = false;
+
+    void (async () => {
+      try {
+        const { fetchMyOrders } = await import("@/lib/orders/orders-browser");
+        const data = await fetchMyOrders();
+        if (!cancelled) setOrders(data);
+      } catch (err) {
+        console.error(err);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [session, navigate]);
 
   const dateLocale = locale === "es" ? "es-MX" : "en-US";
@@ -44,7 +59,10 @@ function MyOrdersPage() {
       <SiteHeader />
 
       <div className="mx-auto w-full max-w-container-max px-margin-mobile py-4 md:px-margin-desktop">
-        <nav aria-label="Breadcrumb" className="flex items-center gap-1 text-sm text-on-surface-variant">
+        <nav
+          aria-label="Breadcrumb"
+          className="flex items-center gap-1 text-sm text-on-surface-variant"
+        >
           <Link to="/" search={homeSearch} className="transition-colors hover:text-primary">
             {t("my_orders_home")}
           </Link>
@@ -65,7 +83,9 @@ function MyOrdersPage() {
               <ClipboardList className="size-10 stroke-[1] text-on-surface-variant" aria-hidden />
             </div>
             <p className="font-headline-md text-on-surface-variant">{t("my_orders_empty")}</p>
-            <p className="mt-2 max-w-md text-sm text-on-surface-variant">{t("my_orders_empty_hint")}</p>
+            <p className="mt-2 max-w-md text-sm text-on-surface-variant">
+              {t("my_orders_empty_hint")}
+            </p>
             <Link
               to="/"
               search={homeSearch}
@@ -101,12 +121,9 @@ function MyOrdersPage() {
                           minute: "2-digit",
                         })}
                         {" · "}
-                        {t(
-                          itemCount === 1
-                            ? "my_orders_items_one"
-                            : "my_orders_items_other",
-                          { count: itemCount },
-                        )}
+                        {t(itemCount === 1 ? "my_orders_items_one" : "my_orders_items_other", {
+                          count: itemCount,
+                        })}
                       </p>
                     </div>
                     <div className="flex items-center gap-3">

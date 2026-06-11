@@ -74,7 +74,9 @@ function AdminEditProductPage() {
 
   return (
     <div>
-      <h1 className="mb-2 font-headline-lg text-headline-lg text-primary">{t("admin_edit_title")}</h1>
+      <h1 className="mb-2 font-headline-lg text-headline-lg text-primary">
+        {t("admin_edit_title")}
+      </h1>
       <p className="mb-8 text-body-md text-on-surface-variant">ID: {productId}</p>
       <ProductForm
         values={values}

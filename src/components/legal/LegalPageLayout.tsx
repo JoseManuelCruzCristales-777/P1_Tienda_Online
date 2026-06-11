@@ -21,7 +21,10 @@ export function LegalPageLayout({ breadcrumb, content, children }: LegalPageLayo
       <SiteHeader />
 
       <div className="mx-auto w-full max-w-container-max px-margin-mobile py-4 md:px-margin-desktop">
-        <nav aria-label="Breadcrumb" className="flex items-center gap-1 text-sm text-on-surface-variant">
+        <nav
+          aria-label="Breadcrumb"
+          className="flex items-center gap-1 text-sm text-on-surface-variant"
+        >
           <Link to="/" search={homeSearch} className="transition-colors hover:text-primary">
             {t("legal_home")}
           </Link>

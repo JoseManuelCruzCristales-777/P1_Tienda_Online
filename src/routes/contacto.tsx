@@ -12,17 +12,16 @@ import {
   STORE_INSTAGRAM_URL,
   STORE_MAPS_URL,
 } from "@/lib/store-config";
-import {
-  buildStoreWhatsAppUrl,
-  formatWhatsAppDisplayNumber,
-  openWhatsApp,
-} from "@/lib/whatsapp";
+import { buildStoreWhatsAppUrl, formatWhatsAppDisplayNumber, openWhatsApp } from "@/lib/whatsapp";
 
 export const Route = createFileRoute("/contacto")({
   head: () => ({
     meta: [
       { title: "Contacto — Rousse Shopping" },
-      { name: "description", content: "Ubicación, horarios y WhatsApp de Rousse Shopping en Oaxaca." },
+      {
+        name: "description",
+        content: "Ubicación, horarios y WhatsApp de Rousse Shopping en Oaxaca.",
+      },
     ],
   }),
   component: ContactPage,
@@ -38,7 +37,10 @@ function ContactPage() {
       <SiteHeader />
 
       <div className="mx-auto w-full max-w-container-max px-margin-mobile py-4 md:px-margin-desktop">
-        <nav aria-label="Breadcrumb" className="flex items-center gap-1 text-sm text-on-surface-variant">
+        <nav
+          aria-label="Breadcrumb"
+          className="flex items-center gap-1 text-sm text-on-surface-variant"
+        >
           <Link to="/" search={homeSearch} className="transition-colors hover:text-primary">
             {t("legal_home")}
           </Link>
@@ -50,7 +52,9 @@ function ContactPage() {
       <main className="mx-auto w-full max-w-container-max flex-grow px-margin-mobile pb-stack-lg md:px-margin-desktop">
         <div className="mb-10 max-w-2xl">
           <h1 className="font-headline-xl text-headline-xl text-primary">{headings.title}</h1>
-          <p className="mt-2 font-body-md text-body-md text-on-surface-variant">{headings.subtitle}</p>
+          <p className="mt-2 font-body-md text-body-md text-on-surface-variant">
+            {headings.subtitle}
+          </p>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">
@@ -58,8 +62,12 @@ function ContactPage() {
             <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
               <MapPin className="size-5 stroke-[1.5]" aria-hidden />
             </div>
-            <h2 className="font-headline-md text-headline-md text-primary">{t("footer_location")}</h2>
-            <p className="mt-2 font-body-md text-on-surface-variant">{formatStoreAddress(locale)}</p>
+            <h2 className="font-headline-md text-headline-md text-primary">
+              {t("footer_location")}
+            </h2>
+            <p className="mt-2 font-body-md text-on-surface-variant">
+              {formatStoreAddress(locale)}
+            </p>
             <a
               href={STORE_MAPS_URL}
               target="_blank"
@@ -74,7 +82,9 @@ function ContactPage() {
             <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
               <Clock className="size-5 stroke-[1.5]" aria-hidden />
             </div>
-            <h2 className="font-headline-md text-headline-md text-primary">{t("footer_hours_title")}</h2>
+            <h2 className="font-headline-md text-headline-md text-primary">
+              {t("footer_hours_title")}
+            </h2>
             <p className="mt-2 font-body-md text-on-surface-variant">{t("footer_hours")}</p>
             <p className="mt-2 text-sm text-on-surface-variant/80">{t("contact_hours_note")}</p>
           </div>
@@ -96,8 +106,12 @@ function ContactPage() {
             <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-[#25D366]/20 text-[#25D366]">
               <MessageCircle className="size-5 stroke-[1.5]" aria-hidden />
             </div>
-            <h2 className="font-headline-md text-headline-md text-primary">{t("footer_whatsapp")}</h2>
-            <p className="mt-2 font-body-md text-on-surface-variant">{formatWhatsAppDisplayNumber()}</p>
+            <h2 className="font-headline-md text-headline-md text-primary">
+              {t("footer_whatsapp")}
+            </h2>
+            <p className="mt-2 font-body-md text-on-surface-variant">
+              {formatWhatsAppDisplayNumber()}
+            </p>
             <p className="mt-2 text-sm text-on-surface-variant/80">{t("contact_whatsapp_hint")}</p>
             <button
               type="button"

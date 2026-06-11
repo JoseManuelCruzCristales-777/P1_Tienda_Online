@@ -34,7 +34,9 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
               className="h-9 w-9 rounded-full object-cover"
             />
             <div>
-              <p className="font-headline-md text-sm font-semibold text-primary">{t("admin_brand")}</p>
+              <p className="font-headline-md text-sm font-semibold text-primary">
+                {t("admin_brand")}
+              </p>
               <p className="text-xs text-on-surface-variant">{t("admin_subtitle")}</p>
             </div>
           </div>

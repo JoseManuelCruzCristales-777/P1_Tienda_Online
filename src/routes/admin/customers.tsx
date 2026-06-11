@@ -1,8 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Trash2, Users } from "lucide-react";
+import { useEffect } from "react";
+import { toast } from "sonner";
 
-import { deleteCustomer, getCustomers, type Customer } from "@/lib/customers";
+import { handleAdminAuthFailure } from "@/lib/auth/admin-auth";
+import { useAdminCustomers, useDeleteCustomer } from "@/lib/customers/queries";
 import { useI18n } from "@/lib/i18n/I18nProvider";
 
 export const Route = createFileRoute("/admin/customers")({
@@ -11,25 +13,71 @@ export const Route = createFileRoute("/admin/customers")({
 
 function AdminCustomersPage() {
   const { t, locale } = useI18n();
-  const [customers, setCustomers] = useState<Customer[]>([]);
+  const navigate = useNavigate();
+  const { data: customers = [], isLoading, error } = useAdminCustomers();
+  const deleteCustomer = useDeleteCustomer();
+
+  const dateLocale = locale === "es" ? "es-MX" : "en-US";
 
   useEffect(() => {
-    setCustomers(getCustomers());
-  }, []);
+    if (!error) return;
+    if (
+      handleAdminAuthFailure(error, () => {
+        toast.error(t("admin_session_expired"));
+        void navigate({ to: "/admin/login" });
+      })
+    ) {
+      return;
+    }
+    toast.error(error instanceof Error ? error.message : t("admin_products_error"));
+  }, [error, navigate, t]);
 
   const handleDelete = (id: string, name: string) => {
     if (!window.confirm(t("admin_customers_delete_confirm", { name }))) return;
-    deleteCustomer(id);
-    setCustomers(getCustomers());
+
+    deleteCustomer.mutate(id, {
+      onError: (err) => {
+        if (
+          handleAdminAuthFailure(err, () => {
+            toast.error(t("admin_session_expired"));
+            void navigate({ to: "/admin/login" });
+          })
+        ) {
+          return;
+        }
+        toast.error(err instanceof Error ? err.message : t("admin_products_error"));
+      },
+    });
   };
 
-  const dateLocale = locale === "es" ? "es-MX" : "en-US";
+  if (error) {
+    if (
+      handleAdminAuthFailure(error, () => {
+        toast.error(t("admin_session_expired"));
+        void navigate({ to: "/admin/login" });
+      })
+    ) {
+      return null;
+    }
+
+    return (
+      <p className="text-error">
+        {error instanceof Error ? error.message : t("admin_products_error")}
+      </p>
+    );
+  }
+
+  if (isLoading) {
+    return <p className="text-on-surface-variant">{t("admin_products_loading")}</p>;
+  }
 
   return (
     <div>
       <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-headline-lg text-headline-lg text-primary">{t("admin_customers_title")}</h1>
+          <h1 className="font-headline-lg text-headline-lg text-primary">
+            {t("admin_customers_title")}
+          </h1>
           <p className="mt-1 text-body-md text-on-surface-variant">
             {customers.length === 0
               ? t("admin_customers_empty")
@@ -41,10 +89,6 @@ function AdminCustomersPage() {
                 )}
           </p>
         </div>
-
-        <span className="inline-flex items-center gap-2 rounded-full border border-secondary/40 bg-secondary-container/30 px-4 py-2 text-xs font-medium text-on-secondary-container">
-          ⚠️ {t("admin_customers_warning")}
-        </span>
       </div>
 
       {customers.length === 0 ? (
@@ -114,7 +158,8 @@ function AdminCustomersPage() {
                     <button
                       type="button"
                       onClick={() => handleDelete(customer.id, customer.fullName)}
-                      className="inline-flex items-center gap-1 rounded-full border border-outline-variant px-3 py-1.5 text-xs text-on-surface-variant transition-colors hover:border-error hover:text-error"
+                      disabled={deleteCustomer.isPending}
+                      className="inline-flex items-center gap-1 rounded-full border border-outline-variant px-3 py-1.5 text-xs text-on-surface-variant transition-colors hover:border-error hover:text-error disabled:opacity-50"
                     >
                       <Trash2 className="size-3.5 stroke-[1.5]" aria-hidden />
                       {t("admin_action_delete")}
@@ -140,7 +185,9 @@ function EmptyState() {
       <p className="text-sm font-label-md uppercase tracking-widest text-on-surface-variant">
         {t("admin_customers_empty_title")}
       </p>
-      <p className="mt-2 max-w-xs text-xs text-on-surface-variant">{t("admin_customers_empty_desc")}</p>
+      <p className="mt-2 max-w-xs text-xs text-on-surface-variant">
+        {t("admin_customers_empty_desc")}
+      </p>
     </div>
   );
 }

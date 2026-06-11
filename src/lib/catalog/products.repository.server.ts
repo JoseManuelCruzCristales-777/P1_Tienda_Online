@@ -1,11 +1,6 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import path from "node:path";
-
 import type { Product, ProductInput } from "./types";
-import { seedProducts } from "./seed";
-
-const DATA_DIR = path.join(process.cwd(), "data");
-const DATA_FILE = path.join(DATA_DIR, "products.json");
+import { mapDbProduct, toDbProductInsert, toDbProductUpdate } from "./products.map";
+import { getSupabaseAdmin } from "@/lib/supabase/admin.server";
 
 function slugify(title: string): string {
   return title
@@ -16,81 +11,93 @@ function slugify(title: string): string {
     .replace(/(^-|-$)/g, "");
 }
 
-async function ensureStore(): Promise<Product[]> {
-  try {
-    const raw = await readFile(DATA_FILE, "utf-8");
-    const parsed = JSON.parse(raw) as Product[];
-    if (!Array.isArray(parsed) || parsed.length === 0) {
-      throw new Error("Invalid catalog file");
-    }
-    return parsed;
-  } catch {
-    await mkdir(DATA_DIR, { recursive: true });
-    await writeFile(DATA_FILE, JSON.stringify(seedProducts, null, 2), "utf-8");
-    return structuredClone(seedProducts);
+async function demoteOtherFeatured(exceptId?: string): Promise<void> {
+  const supabase = getSupabaseAdmin();
+  let query = supabase
+    .from("products")
+    .update({ layout_role: "standard" })
+    .eq("layout_role", "featured");
+
+  if (exceptId) {
+    query = query.neq("id", exceptId);
   }
+
+  const { error } = await query;
+  if (error) throw new Error(error.message);
 }
 
-async function persist(products: Product[]): Promise<void> {
-  await mkdir(DATA_DIR, { recursive: true });
-  await writeFile(DATA_FILE, JSON.stringify(products, null, 2), "utf-8");
+async function uniqueProductId(baseId: string): Promise<string> {
+  const supabase = getSupabaseAdmin();
+  let id = baseId;
+  let suffix = 1;
+
+  while (true) {
+    const { data, error } = await supabase.from("products").select("id").eq("id", id).maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!data) return id;
+    id = `${baseId}-${suffix++}`;
+  }
 }
 
 export async function listProducts(): Promise<Product[]> {
-  return ensureStore();
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("products")
+    .select("*")
+    .order("created_at", { ascending: true });
+
+  if (error) throw new Error(error.message);
+  return (data ?? []).map(mapDbProduct);
 }
 
 export async function getProductById(id: string): Promise<Product | null> {
-  const products = await ensureStore();
-  return products.find((p) => p.id === id) ?? null;
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase.from("products").select("*").eq("id", id).maybeSingle();
+
+  if (error) throw new Error(error.message);
+  return data ? mapDbProduct(data) : null;
 }
 
 export async function createProduct(input: ProductInput): Promise<Product> {
-  const products = await ensureStore();
+  const supabase = getSupabaseAdmin();
   const baseId = slugify(input.title) || "product";
-  let id = baseId;
-  let suffix = 1;
-  while (products.some((p) => p.id === id)) {
-    id = `${baseId}-${suffix++}`;
-  }
+  const id = await uniqueProductId(baseId);
 
   if (input.layoutRole === "featured") {
-    for (const product of products) {
-      if (product.layoutRole === "featured") {
-        product.layoutRole = "standard";
-      }
-    }
+    await demoteOtherFeatured();
   }
 
-  const product: Product = { id, ...input };
-  products.push(product);
-  await persist(products);
-  return product;
+  const row = toDbProductInsert(id, input);
+  const { data, error } = await supabase.from("products").insert(row).select().single();
+
+  if (error) throw new Error(error.message);
+  return mapDbProduct(data);
 }
 
 export async function updateProduct(id: string, input: ProductInput): Promise<Product | null> {
-  const products = await ensureStore();
-  const index = products.findIndex((p) => p.id === id);
-  if (index === -1) return null;
+  const supabase = getSupabaseAdmin();
+  const existing = await getProductById(id);
+  if (!existing) return null;
 
   if (input.layoutRole === "featured") {
-    for (const product of products) {
-      if (product.id !== id && product.layoutRole === "featured") {
-        product.layoutRole = "standard";
-      }
-    }
+    await demoteOtherFeatured(id);
   }
 
-  const updated: Product = { id, ...input };
-  products[index] = updated;
-  await persist(products);
-  return updated;
+  const { data, error } = await supabase
+    .from("products")
+    .update(toDbProductUpdate(input))
+    .eq("id", id)
+    .select()
+    .maybeSingle();
+
+  if (error) throw new Error(error.message);
+  return data ? mapDbProduct(data) : null;
 }
 
 export async function deleteProduct(id: string): Promise<boolean> {
-  const products = await ensureStore();
-  const next = products.filter((p) => p.id !== id);
-  if (next.length === products.length) return false;
-  await persist(next);
-  return true;
+  const supabase = getSupabaseAdmin();
+  const { error, count } = await supabase.from("products").delete({ count: "exact" }).eq("id", id);
+
+  if (error) throw new Error(error.message);
+  return (count ?? 0) > 0;
 }

@@ -1,6 +1,8 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
+import { readServerEnv } from "@/lib/supabase/env.server";
+
 const SESSION_TTL_MS = 1000 * 60 * 60 * 12;
 const SESSIONS_FILE = path.join(process.cwd(), "data", "admin-sessions.json");
 
@@ -63,8 +65,8 @@ export function isAdminSessionValid(token: string | undefined | null): boolean {
 
 export function getAdminCredentials() {
   return {
-    username: process.env.ADMIN_USERNAME ?? "admin",
-    password: process.env.ADMIN_PASSWORD ?? "rousse-admin",
+    username: readServerEnv("ADMIN_USERNAME") ?? "admin",
+    password: readServerEnv("ADMIN_PASSWORD") ?? "rousse-admin",
   };
 }
 

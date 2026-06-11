@@ -187,9 +187,7 @@ const termsEn: LegalPageContent = {
     },
     {
       heading: "Changes",
-      paragraphs: [
-        "We may update these terms. The update date is shown at the top of this page.",
-      ],
+      paragraphs: ["We may update these terms. The update date is shown at the top of this page."],
     },
   ],
 };

@@ -103,6 +103,7 @@ function RegisterPage() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [pendingEmailConfirmation, setPendingEmailConfirmation] = useState(false);
 
   const update = <K extends keyof RegisterFormValues>(key: K, value: string) => {
     setValues((prev) => ({ ...prev, [key]: value }));
@@ -124,41 +125,21 @@ function RegisterPage() {
     setIsSubmitting(true);
 
     try {
-      // TODO: Reemplazar con supabase.auth.signUp cuando conectes Supabase:
-      //
-      //   const { error } = await supabase.auth.signUp({
-      //     email: values.email,
-      //     password: values.password,
-      //     options: { data: { full_name: values.fullName, phone: values.phone } },
-      //   });
-      //   if (error) throw error;
-      //
-      // TODO: Luego insertar perfil de cliente en tabla "customers":
-      //   await supabase.from("customers").insert({
-      //     full_name: values.fullName,
-      //     email: values.email,
-      //     whatsapp_phone: values.phone,
-      //   });
+      const { signUpCustomer } = await import("@/lib/auth/customer-auth");
+      const result = await signUpCustomer({
+        fullName: values.fullName,
+        email: values.email,
+        phone: values.phone,
+        password: values.password,
+      });
 
-      // MOCK: guardamos en localStorage mientras no haya Supabase.
-      // saveCustomerWithPassword guarda el cliente + credenciales en claves separadas.
-      // TODO: Reemplazar con supabase.auth.signUp cuando conectes Supabase.
-      const { saveCustomerWithPassword } = await import("@/lib/customers");
-      const customer = saveCustomerWithPassword(
-        { fullName: values.fullName, email: values.email, phone: values.phone },
-        values.password,
-      );
+      if (!result.ok) {
+        setErrors({ email: result.error });
+        return;
+      }
 
-      // Inicia sesión automáticamente y notifica al Header en tiempo real
-      // TODO: con Supabase, esto lo maneja supabase.auth.onAuthStateChange()
-      const { setSession } = await import("@/lib/session");
-      setSession({ id: customer.id, name: customer.fullName, email: customer.email, phone: customer.phone });
       window.dispatchEvent(new Event("auth-updated"));
-
-      await new Promise<void>((resolve) => setTimeout(resolve, 1500));
-      setSuccess(true);
-
-      await new Promise<void>((resolve) => setTimeout(resolve, 1200));
+      await new Promise<void>((resolve) => setTimeout(resolve, 800));
       await navigate({ to: "/", search: { category: undefined, q: undefined } });
     } catch (err) {
       console.error(err);
@@ -172,16 +153,21 @@ function RegisterPage() {
     <div className="flex min-h-screen flex-col bg-background">
       <SiteHeader />
 
-      <main className="flex flex-1 items-center justify-center px-margin-mobile py-12 md:px-margin-desktop">
+      <main className="flex flex-1 items-center justify-center px-4 py-8 pb-safe sm:px-margin-mobile sm:py-12 md:px-margin-desktop">
         <div className="grid w-full max-w-5xl overflow-hidden rounded-xl bg-surface-container-lowest shadow-[0_30px_80px_rgba(7,6,40,0.12)] md:grid-cols-2">
           {/* Brand panel */}
           <aside className="relative hidden flex-col justify-between overflow-hidden bg-primary p-10 text-on-primary md:flex">
             <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-secondary-container/20 blur-3xl" />
             <div className="absolute -bottom-32 -left-20 h-80 w-80 rounded-full bg-primary-container/40 blur-3xl" />
             <div className="relative">
-              <img src="/logo.png" alt="Rousse Shopping" className="h-16 w-16 rounded-full object-cover" />
+              <img
+                src="/logo.png"
+                alt="Rousse Shopping"
+                className="h-16 w-16 rounded-full object-cover"
+              />
               <h2 className="mt-10 font-headline-xl text-headline-xl leading-tight">
-                Únete a<br />Rousse.
+                Únete a<br />
+                Rousse.
               </h2>
               <p className="mt-4 max-w-xs text-body-md text-on-primary/80">
                 Accede a colecciones exclusivas, novedades antes que nadie y recoge tus piezas
@@ -196,7 +182,7 @@ function RegisterPage() {
           {/* Form panel */}
           <section className="flex flex-col justify-center p-8 md:p-12">
             {success ? (
-              <SuccessBanner />
+              <SuccessBanner needsEmailConfirmation={pendingEmailConfirmation} />
             ) : (
               <>
                 <div className="mb-8">
@@ -386,18 +372,25 @@ function FieldGroup({ label, error, icon, action, children }: FieldGroupProps) {
   );
 }
 
-function SuccessBanner() {
+function SuccessBanner({ needsEmailConfirmation }: { needsEmailConfirmation: boolean }) {
   return (
     <div className="flex flex-col items-center justify-center gap-4 py-12 text-center">
       <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
         <span className="text-3xl">🎉</span>
       </div>
       <h2 className="font-headline-lg text-headline-lg-mobile text-primary">
-        ¡Cuenta creada con éxito!
+        {needsEmailConfirmation ? "Revisa tu correo" : "¡Cuenta creada con éxito!"}
       </h2>
       <p className="max-w-xs text-body-md text-on-surface-variant">
-        Te estamos redirigiendo a la pantalla de inicio de sesión…
+        {needsEmailConfirmation
+          ? "Te enviamos un enlace de confirmación. Después podrás iniciar sesión y apartar productos."
+          : "Te estamos redirigiendo al inicio…"}
       </p>
+      {needsEmailConfirmation && (
+        <Link to="/login" className="mt-2 font-semibold text-primary hover:underline">
+          Ir a iniciar sesión
+        </Link>
+      )}
     </div>
   );
 }

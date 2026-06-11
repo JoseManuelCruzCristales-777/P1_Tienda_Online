@@ -62,8 +62,7 @@ export function useUpdateProduct() {
 export function useDeleteProduct() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) =>
-      deleteCatalogProduct({ data: { adminToken: requireToken(), id } }),
+    mutationFn: (id: string) => deleteCatalogProduct({ data: { adminToken: requireToken(), id } }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: catalogKeys.all });
     },

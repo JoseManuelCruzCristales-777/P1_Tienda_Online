@@ -1,17 +1,14 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ClipboardList, Eye } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { toast } from "sonner";
 
 import { OrderStatusBadge } from "@/components/orders/OrderStatusBadge";
-import {
-  countOrdersByStatus,
-  formatOrderId,
-  getOrders,
-  type Order,
-  type OrderStatus,
-} from "@/lib/orders";
+import { handleAdminAuthFailure } from "@/lib/auth/admin-auth";
 import { useI18n } from "@/lib/i18n/I18nProvider";
 import type { TranslationKey } from "@/lib/i18n/translations";
+import { countOrdersByStatus, formatOrderId, type OrderStatus } from "@/lib/orders";
+import { useAdminOrders } from "@/lib/orders/queries";
 
 export const Route = createFileRoute("/admin/orders")({
   component: AdminOrdersPage,
@@ -29,26 +26,37 @@ const FILTER_KEYS: Record<StatusFilter, TranslationKey> = {
 
 function AdminOrdersPage() {
   const { t, locale } = useI18n();
-  const [orders, setOrders] = useState<Order[]>([]);
+  const navigate = useNavigate();
+  const { data: orders = [], isLoading, error } = useAdminOrders();
   const [filter, setFilter] = useState<StatusFilter>("all");
 
-  useEffect(() => {
-    setOrders(getOrders());
-  }, []);
-
-  const counts = useMemo(() => countOrdersByStatus(), [orders]);
-  const filtered =
-    filter === "all" ? orders : orders.filter((o) => o.status === filter);
+  const counts = useMemo(() => countOrdersByStatus(orders), [orders]);
+  const filtered = filter === "all" ? orders : orders.filter((o) => o.status === filter);
 
   const dateLocale = locale === "es" ? "es-MX" : "en-US";
 
-  const filters: StatusFilter[] = [
-    "all",
-    "pending",
-    "confirmed",
-    "picked_up",
-    "cancelled",
-  ];
+  const filters: StatusFilter[] = ["all", "pending", "confirmed", "picked_up", "cancelled"];
+
+  if (error) {
+    if (
+      handleAdminAuthFailure(error, () => {
+        toast.error(t("admin_session_expired"));
+        void navigate({ to: "/admin/login" });
+      })
+    ) {
+      return null;
+    }
+
+    return (
+      <p className="text-error">
+        {error instanceof Error ? error.message : t("admin_products_error")}
+      </p>
+    );
+  }
+
+  if (isLoading) {
+    return <p className="text-on-surface-variant">{t("admin_products_loading")}</p>;
+  }
 
   return (
     <div>
@@ -60,26 +68,16 @@ function AdminOrdersPage() {
           <p className="mt-1 text-body-md text-on-surface-variant">
             {orders.length === 0
               ? t("admin_orders_empty")
-              : t(
-                  orders.length === 1
-                    ? "admin_orders_count_one"
-                    : "admin_orders_count_other",
-                  { count: orders.length },
-                )}
+              : t(orders.length === 1 ? "admin_orders_count_one" : "admin_orders_count_other", {
+                  count: orders.length,
+                })}
           </p>
         </div>
-
-        <span className="inline-flex items-center gap-2 rounded-full border border-secondary/40 bg-secondary-container/30 px-4 py-2 text-xs font-medium text-on-secondary-container">
-          ⚠️ {t("admin_orders_warning")}
-        </span>
       </div>
 
       <div className="mb-6 flex flex-wrap gap-2">
         {filters.map((key) => {
-          const count =
-            key === "all"
-              ? orders.length
-              : counts[key as OrderStatus];
+          const count = key === "all" ? orders.length : counts[key as OrderStatus];
           return (
             <button
               key={key}
@@ -130,9 +128,7 @@ function AdminOrdersPage() {
                   key={order.id}
                   className="border-b border-surface-container-highest last:border-0 transition-colors hover:bg-surface-container-low/50"
                 >
-                  <td className="px-4 py-4 font-medium text-primary">
-                    {formatOrderId(order.id)}
-                  </td>
+                  <td className="px-4 py-4 font-medium text-primary">{formatOrderId(order.id)}</td>
                   <td className="hidden px-4 py-4 md:table-cell">
                     <p className="font-medium text-on-surface">{order.customerName}</p>
                     <p className="text-xs text-on-surface-variant">{order.customerEmail}</p>

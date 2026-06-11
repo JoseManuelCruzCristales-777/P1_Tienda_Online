@@ -92,7 +92,7 @@ export function ProductCard({ product, className, onCartUpdate }: ProductCardPro
       <Link
         to="/product/$productId"
         params={{ productId: product.id }}
-        className="relative block h-64 w-full overflow-hidden bg-surface-container-low"
+        className="relative block aspect-[4/5] w-full overflow-hidden bg-surface-container-low"
       >
         <img
           alt={product.title}
@@ -113,11 +113,12 @@ export function ProductCard({ product, className, onCartUpdate }: ProductCardPro
       </Link>
 
       {/* Info + botones */}
-      <div className="z-10 flex flex-grow flex-col justify-between bg-surface p-4">
-        {/* Título y precio — clic navega al detalle */}
+      <div className="z-10 flex flex-grow flex-col justify-between bg-surface p-3 sm:p-4">
         <Link to="/product/$productId" params={{ productId: product.id }}>
-          <h4 className="truncate font-label-md text-label-md text-on-surface">{product.title}</h4>
-          <span className="mt-1 block font-body-md text-body-md text-on-surface-variant">
+          <h4 className="line-clamp-2 min-h-[2.5rem] text-sm font-semibold leading-snug text-on-surface sm:text-label-md">
+            {product.title}
+          </h4>
+          <span className="mt-1 block text-sm font-medium text-on-surface-variant sm:text-body-md">
             {product.price}
           </span>
         </Link>
@@ -131,15 +132,14 @@ export function ProductCard({ product, className, onCartUpdate }: ProductCardPro
         )}
 
         {/* ── Botones de acción (visibles al hacer hover en desktop) ── */}
-        <div className="mt-3 flex flex-col gap-2 md:translate-y-2 md:opacity-0 md:transition-all md:duration-200 md:group-hover:translate-y-0 md:group-hover:opacity-100">
-
+        <div className="mt-2 flex flex-col gap-2 sm:mt-3 md:translate-y-2 md:opacity-0 md:transition-all md:duration-200 md:group-hover:translate-y-0 md:group-hover:opacity-100">
           {/* Botón "Agregar a la bolsa" */}
           <button
             type="button"
             onClick={handleAddToCart}
             disabled={isAdded || needsAuth}
             className={cn(
-              "flex w-full items-center justify-center gap-2 border py-2 text-xs font-medium tracking-wide transition-all duration-150 active:scale-[0.98]",
+              "flex min-h-[44px] w-full items-center justify-center gap-2 border py-2.5 text-xs font-medium tracking-wide transition-all duration-150 active:scale-[0.98]",
               isAdded
                 ? "cursor-default border-on-surface bg-on-surface text-surface"
                 : needsAuth
@@ -160,7 +160,7 @@ export function ProductCard({ product, className, onCartUpdate }: ProductCardPro
             href={whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex w-full items-center justify-center gap-2 border border-[#25D366] bg-[#25D366] py-2 text-xs font-medium tracking-wide text-white transition-all duration-150 hover:bg-[#1ebe5d] active:scale-[0.98]"
+            className="flex min-h-[44px] w-full items-center justify-center gap-2 border border-[#25D366] bg-[#25D366] py-2.5 text-xs font-medium tracking-wide text-white transition-all duration-150 hover:bg-[#1ebe5d] active:scale-[0.98]"
           >
             {/* WhatsApp SVG icon */}
             <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">

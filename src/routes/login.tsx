@@ -3,15 +3,17 @@ import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 import { useState } from "react";
 
 import { SiteFooter, SiteHeader } from "@/components/SiteChrome";
-import { authenticateCustomer } from "@/lib/customers";
+import { signInCustomer } from "@/lib/auth/customer-auth";
 import { useI18n } from "@/lib/i18n/I18nProvider";
-import { setSession } from "@/lib/session";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
       { title: "Iniciar sesión — Rousse Shopping" },
-      { name: "description", content: "Accede a tu cuenta Rousse Shopping para gestionar tus apartados y favoritos." },
+      {
+        name: "description",
+        content: "Accede a tu cuenta Rousse Shopping para gestionar tus apartados y favoritos.",
+      },
       { property: "og:title", content: "Iniciar sesión — Rousse Shopping" },
     ],
   }),
@@ -34,27 +36,14 @@ function LoginPage() {
     setIsLoading(true);
 
     try {
-      // TODO: Reemplazar con supabase.auth.signInWithPassword({ email, password })
-      // cuando conectes Supabase. Eliminar la llamada a authenticateCustomer.
-      const customer = authenticateCustomer(email.trim(), password);
+      const result = await signInCustomer(email, password);
 
-      if (!customer) {
-        setError("Correo o contraseña incorrectos. Verifica tus datos.");
+      if (!result.ok) {
+        setError(result.error);
         return;
       }
 
-      // Guarda la sesión en localStorage bajo la clave 'rousse-session'
-      setSession({
-        id: customer.id,
-        name: customer.fullName,
-        email: customer.email,
-        phone: customer.phone,
-      });
-
-      // Notifica al Header para que actualice la UI en tiempo real sin recargar
-      // TODO: con Supabase, esto lo maneja supabase.auth.onAuthStateChange()
       window.dispatchEvent(new Event("auth-updated"));
-
       await navigate({ to: "/", search: { category: undefined, q: undefined } });
     } catch (err) {
       setError("Hubo un error inesperado. Intenta de nuevo.");
@@ -68,20 +57,26 @@ function LoginPage() {
     <div className="flex min-h-screen flex-col bg-background">
       <SiteHeader />
 
-      <main className="flex flex-1 items-center justify-center px-margin-mobile py-12 md:px-margin-desktop">
+      <main className="flex flex-1 items-center justify-center px-4 py-8 pb-safe sm:px-margin-mobile sm:py-12 md:px-margin-desktop">
         <div className="grid w-full max-w-5xl overflow-hidden rounded-xl bg-surface-container-lowest shadow-[0_30px_80px_rgba(7,6,40,0.12)] md:grid-cols-2">
-
           {/* ── Panel de marca ── */}
           <aside className="relative hidden flex-col justify-between overflow-hidden bg-primary p-10 text-on-primary md:flex">
             <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-secondary-container/20 blur-3xl" />
             <div className="absolute -bottom-32 -left-20 h-80 w-80 rounded-full bg-primary-container/40 blur-3xl" />
             <div className="relative">
-              <img src="/logo.png" alt="Rousse Shopping" className="h-16 w-16 rounded-full object-cover" />
+              <img
+                src="/logo.png"
+                alt="Rousse Shopping"
+                className="h-16 w-16 rounded-full object-cover"
+              />
               <h2 className="mt-10 font-headline-xl text-headline-xl leading-tight">
-                Bienvenida<br />de vuelta.
+                Bienvenida
+                <br />
+                de vuelta.
               </h2>
               <p className="mt-4 max-w-xs text-body-md text-on-primary/80">
-                Gestiona tus apartados, descubre nuevas colecciones y recoge en boutique sin complicaciones.
+                Gestiona tus apartados, descubre nuevas colecciones y recoge en boutique sin
+                complicaciones.
               </p>
             </div>
             <span className="relative font-label-md uppercase tracking-widest text-on-primary/60">
@@ -104,7 +99,6 @@ function LoginPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-
               {/* Error banner */}
               {error && (
                 <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm font-medium text-red-700">
@@ -153,10 +147,11 @@ function LoginPage() {
                     aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                     className="ml-2 text-on-surface-variant transition-colors hover:text-primary"
                   >
-                    {showPassword
-                      ? <EyeOff aria-hidden className="size-4" />
-                      : <Eye aria-hidden className="size-4" />
-                    }
+                    {showPassword ? (
+                      <EyeOff aria-hidden className="size-4" />
+                    ) : (
+                      <Eye aria-hidden className="size-4" />
+                    )}
                   </button>
                 </div>
               </label>
@@ -169,26 +164,18 @@ function LoginPage() {
               >
                 {isLoading ? t("login_loading") : t("login_submit")}
               </button>
-
-              <div className="flex items-center gap-3">
-                <div className="h-px flex-1 bg-surface-container-highest" />
-                <span className="font-label-md text-xs uppercase text-on-surface-variant">o</span>
-                <div className="h-px flex-1 bg-surface-container-highest" />
-              </div>
-
-              {/* Admin shortcut */}
-              <Link
-                to="/admin/login"
-                className="flex items-center justify-center gap-2 rounded-full border border-outline-variant py-3 text-sm font-medium text-on-surface transition-colors hover:bg-surface-container"
-              >
-                {t("login_admin")}
-              </Link>
             </form>
 
             <p className="mt-8 text-center text-xs text-on-surface-variant">
-              Al continuar aceptas nuestros{" "}
-              <a className="underline" href="#">Términos</a> y{" "}
-              <a className="underline" href="#">Política de Privacidad</a>.
+              Al continuar aceptas nuestros{" "}3
+              <a className="underline" href="#">
+                Términos
+              </a>{" "}
+              y{" "}
+              <a className="underline" href="#">
+                Política de Privacidad
+              </a>
+              .
             </p>
           </section>
         </div>

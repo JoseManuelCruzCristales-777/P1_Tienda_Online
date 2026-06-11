@@ -14,7 +14,6 @@ import {
 } from "@/lib/cart";
 import { homeSearch } from "@/lib/home-search";
 import { useI18n } from "@/lib/i18n/I18nProvider";
-import { placeOrder } from "@/lib/orders";
 import { getSession } from "@/lib/session";
 import { buildCartWhatsAppUrl, openWhatsApp } from "@/lib/whatsapp";
 
@@ -22,7 +21,10 @@ export const Route = createFileRoute("/bag")({
   head: () => ({
     meta: [
       { title: "Bolsa de compras — Rousse Shopping" },
-      { name: "description", content: "Revisa tus artículos reservados y confirma tu apartado en boutique." },
+      {
+        name: "description",
+        content: "Revisa tus artículos reservados y confirma tu apartado en boutique.",
+      },
       { property: "og:title", content: "Bolsa de compras — Rousse Shopping" },
     ],
   }),
@@ -70,17 +72,23 @@ function Bag() {
     syncCartState(updateCartQuantity(id, item.quantity + delta));
   }
 
-  function handleWhatsAppReserve() {
+  async function handleWhatsAppReserve() {
     if (!session || items.length === 0) return;
 
-    placeOrder({
-      items,
-      total,
-      customerId: session.id,
-      customerName: session.name,
-      customerPhone: session.phone,
-      customerEmail: session.email,
-    });
+    try {
+      const { placeOrder } = await import("@/lib/orders/orders-browser");
+      await placeOrder({
+        items,
+        total,
+        customerId: session.id,
+        customerName: session.name,
+        customerPhone: session.phone,
+        customerEmail: session.email,
+      });
+    } catch (err) {
+      console.error(err);
+      return;
+    }
 
     const url = buildCartWhatsAppUrl(items, {
       locale,
@@ -106,7 +114,10 @@ function Bag() {
 
       {/* Breadcrumb */}
       <div className="mx-auto w-full max-w-container-max px-margin-mobile py-4 md:px-margin-desktop">
-        <nav aria-label="Breadcrumb" className="flex items-center gap-1 text-sm text-on-surface-variant">
+        <nav
+          aria-label="Breadcrumb"
+          className="flex items-center gap-1 text-sm text-on-surface-variant"
+        >
           <Link to="/" search={homeSearch} className="transition-colors hover:text-primary">
             {t("bag_home")}
           </Link>
@@ -117,7 +128,9 @@ function Bag() {
 
       <main className="mx-auto w-full flex-grow max-w-container-max px-margin-mobile pb-stack-lg md:px-margin-desktop">
         <div className="mb-stack-md">
-          <h1 className="font-headline-xl text-headline-xl text-primary">{t("bag_title")}</h1>
+          <h1 className="font-headline-xl text-headline-lg-mobile text-primary md:text-headline-xl">
+            {t("bag_title")}
+          </h1>
           {session && (
             <p className="mt-1 text-body-md text-on-surface-variant">
               {t("bag_greeting", {
@@ -125,12 +138,9 @@ function Bag() {
                 status:
                   itemCount === 0
                     ? t("bag_greeting_empty")
-                    : t(
-                        itemCount === 1
-                          ? "bag_greeting_items_one"
-                          : "bag_greeting_items_other",
-                        { count: itemCount },
-                      ),
+                    : t(itemCount === 1 ? "bag_greeting_items_one" : "bag_greeting_items_other", {
+                        count: itemCount,
+                      }),
               })}
             </p>
           )}
@@ -145,9 +155,7 @@ function Bag() {
             <p className="font-headline-md text-headline-md text-on-surface-variant">
               {t("bag_empty")}
             </p>
-            <p className="mt-2 text-body-md text-on-surface-variant">
-              {t("bag_empty_hint")}
-            </p>
+            <p className="mt-2 text-body-md text-on-surface-variant">{t("bag_empty_hint")}</p>
             <Link
               to="/"
               search={homeSearch}
@@ -157,8 +165,7 @@ function Bag() {
             </Link>
           </div>
         ) : (
-          <div className="flex flex-col items-start gap-gutter lg:flex-row">
-
+          <div className="flex flex-col items-start gap-gutter pb-36 lg:flex-row lg:pb-0">
             {/* ── Lista de artículos ── */}
             <div className="flex w-full flex-col gap-stack-sm lg:w-2/3">
               {items.map((item) => (
@@ -231,7 +238,10 @@ function Bag() {
 
               {/* Aviso de pago en tienda */}
               <div className="mt-2 flex items-start gap-3 rounded-lg border border-secondary-container bg-secondary-container/20 p-4">
-                <Package aria-hidden className="mt-0.5 size-5 shrink-0 stroke-[1.5] text-secondary" />
+                <Package
+                  aria-hidden
+                  className="mt-0.5 size-5 shrink-0 stroke-[1.5] text-secondary"
+                />
                 <div>
                   <h4 className="font-label-md text-label-md text-on-surface">
                     {t("bag_pickup_title")}
@@ -241,20 +251,24 @@ function Bag() {
               </div>
             </div>
 
-            {/* ── Resumen de orden ── */}
+            {/* ── Resumen de orden — sticky en desktop, barra fija en móvil ── */}
             <div className="w-full lg:sticky lg:top-[180px] lg:w-1/3">
-              <div className="glass-panel rounded-xl p-8 shadow-sm">
-                <h2 className="mb-6 border-b border-surface-container-highest pb-4 font-headline-md text-headline-md text-primary">
-                  {t("bag_summary")}
-                </h2>
+              <div className="glass-panel rounded-xl p-5 shadow-sm sm:p-8 max-lg:fixed max-lg:bottom-0 max-lg:left-0 max-lg:right-0 max-lg:z-40 max-lg:rounded-none max-lg:border-t max-lg:border-surface-container-highest max-lg:pb-safe max-lg:shadow-[0_-8px_30px_rgba(0,0,0,0.08)]">
+                <div className="mb-4 flex items-center justify-between border-b border-surface-container-highest pb-3 lg:mb-6 lg:pb-4">
+                  <h2 className="font-headline-md text-base text-primary sm:text-headline-md">
+                    {t("bag_summary")}
+                  </h2>
+                  <span className="font-headline-md text-base text-primary sm:hidden">
+                    ${total.toFixed(2)} MXN
+                  </span>
+                </div>
 
-                <div className="mb-6 flex flex-col gap-4 font-body-md text-body-md text-on-surface-variant">
+                <div className="mb-4 hidden flex-col gap-4 font-body-md text-body-md text-on-surface-variant sm:flex lg:mb-6">
                   <div className="flex justify-between">
                     <span>
-                      {t(
-                        itemCount === 1 ? "bag_subtotal_one" : "bag_subtotal",
-                        { count: itemCount },
-                      )}
+                      {t(itemCount === 1 ? "bag_subtotal_one" : "bag_subtotal", {
+                        count: itemCount,
+                      })}
                     </span>
                     <span className="font-medium text-primary">${total.toFixed(2)} MXN</span>
                   </div>
@@ -264,8 +278,10 @@ function Bag() {
                   </div>
                 </div>
 
-                <div className="mb-8 flex items-center justify-between border-t border-surface-container-highest pt-5">
-                  <span className="font-headline-md text-headline-md text-primary">{t("bag_total")}</span>
+                <div className="mb-4 hidden items-center justify-between border-t border-surface-container-highest pt-5 lg:mb-8 lg:flex">
+                  <span className="font-headline-md text-headline-md text-primary">
+                    {t("bag_total")}
+                  </span>
                   <span className="font-headline-md text-headline-md text-primary">
                     ${total.toFixed(2)} MXN
                   </span>
@@ -276,18 +292,24 @@ function Bag() {
                   onClick={handleWhatsAppReserve}
                   className="flex w-full items-center justify-center gap-2 rounded-full border border-[#25D366] bg-[#25D366] py-4 font-label-md text-label-md uppercase text-white transition-colors hover:bg-[#1ebe5d]"
                 >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
                     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
                     <path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.117 1.528 5.847L.057 23.5a.5.5 0 00.623.624l5.701-1.488A11.953 11.953 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.893a9.877 9.877 0 01-5.031-1.378l-.361-.214-3.732.974.998-3.648-.235-.374A9.865 9.865 0 012.107 12C2.107 6.549 6.549 2.107 12 2.107c5.45 0 9.893 4.442 9.893 9.893 0 5.45-4.443 9.893-9.893 9.893z" />
                   </svg>
                   {t("bag_whatsapp")}
                 </button>
 
-                <p className="mt-3 text-center text-xs text-on-surface-variant/80">
+                <p className="mt-2 hidden text-center text-xs text-on-surface-variant/80 sm:block">
                   {t("bag_whatsapp_hint")}
                 </p>
 
-                <p className="mt-2 text-center text-xs text-on-surface-variant/70">
+                <p className="mt-2 hidden text-center text-xs text-on-surface-variant/70 sm:block">
                   {t("bag_whatsapp_terms_prefix")}{" "}
                   <Link
                     to="/legal/terminos"
@@ -299,7 +321,6 @@ function Bag() {
                 </p>
               </div>
             </div>
-
           </div>
         )}
       </main>
